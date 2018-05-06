@@ -33,32 +33,32 @@ class TestGetArgumentParser(unittest.TestCase):
 
     :cvar str INPUT: input file
     :cvar str OUTPUT: output file
-    :cvar str MONGODB: mongoDB configuration file
+    :cvar str CONFIG: mongoDB configuration file
     """
     INPUT = "foo"
     OUTPUT = "bar"
-    MONGODB = "baz"
+    CONFIG = "baz"
 
     def test_positional_arguments_00(self):
         """Test positional arguments."""
         parser = src.cli.get_argument_parser()
-        args = parser.parse_args([self.INPUT, self.MONGODB])
+        args = parser.parse_args([self.INPUT, self.CONFIG])
         self.assertEqual(
             self.INPUT,
             args.input,
             msg="{} != {}".format(self.INPUT, args.input)
         )
         self.assertEqual(
-            self.MONGODB,
-            args.mongoDB,
-            msg="{} != {}".format(self.MONGODB, args.mongoDB)
+            self.CONFIG,
+            args.config,
+            msg="{} != {}".format(self.CONFIG, args.config)
         )
         return
 
     def test_optional_arguments_00(self):
         """Test optional arguments."""
         parser = src.cli.get_argument_parser()
-        args = parser.parse_args([self.INPUT, self.MONGODB, "-o", self.OUTPUT])
+        args = parser.parse_args([self.INPUT, self.CONFIG, "-o", self.OUTPUT])
         self.assertEqual(
             self.OUTPUT,
             args.output,
@@ -70,7 +70,7 @@ class TestGetArgumentParser(unittest.TestCase):
         """Test optional arguments."""
         parser = src.cli.get_argument_parser()
         args = parser.parse_args(
-            [self.INPUT, self.MONGODB, "--output", self.OUTPUT]
+            [self.INPUT, self.CONFIG, "--output", self.OUTPUT]
         )
         self.assertEqual(
             self.OUTPUT,
