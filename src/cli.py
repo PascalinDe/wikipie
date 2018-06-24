@@ -35,9 +35,9 @@ def get_argument_parser():
     """
     try:
         parser = argparse.ArgumentParser()
-        parser.add_argument("input", help="input file (XML)")
+        parser.add_argument("input", help="input file")
         parser.add_argument("config", help="mongoDB configuration file")
-        parser.add_argument("-o", "--output", help="output file (JSON)")
+        parser.add_argument("-o", "--output", help="output file")
     except Exception:
         raise
     return parser
