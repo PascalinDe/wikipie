@@ -21,6 +21,7 @@
 
 
 # standard library imports
+import os
 import argparse
 
 # third party imports
@@ -38,6 +39,10 @@ def get_argument_parser():
         parser.add_argument("input", help="input file")
         parser.add_argument("config", help="mongoDB configuration file")
         parser.add_argument("-o", "--output", help="output file")
+        parser.add_argument(
+            "-p", "--processes",
+            default=os.cpu_count(), type=int, help="number of processes"
+        )
     except Exception:
         raise
     return parser
