@@ -16,7 +16,7 @@
 
 
 """
-:synopsis: XML file parser.
+:synopsis: XML parser.
 """
 
 
@@ -45,8 +45,8 @@ def _validate(xml, xsd, tree):
     return
 
 
-def parse(xml, xsd):
-    """Parse.
+def parse_xml(xml, xsd):
+    """Parse XML.
 
     :param str xml: XML file
     :param str xsd: XSD
