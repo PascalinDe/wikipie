@@ -38,8 +38,7 @@ def get_client(config):
     try:
         client = pymongo.MongoClient(**config["client"])
     except KeyError:
-        msg = "'client' header required"
-        raise RuntimeError(msg)
+        raise RuntimeError("'client' header required")
     except Exception:
         raise
     return client
