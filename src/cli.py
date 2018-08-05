@@ -35,15 +35,19 @@ def get_argument_parser():
     :rtype: ArgumentParser
     """
     try:
-        parser = argparse.ArgumentParser()
-        parser.add_argument("input", help="input file")
-        parser.add_argument("xsd", help="XSD")
-        parser.add_argument("config", help="mongoDB configuration file")
-        parser.add_argument("-o", "--output", help="output file")
-        parser.add_argument(
+        argument_parser = argparse.ArgumentParser()
+        argument_parser.add_argument("input", help="input file")
+        argument_parser.add_argument("xsd", help="XSD")
+        argument_parser.add_argument(
+            "-m", "--mongoDB", help="mongoDB configuration file"
+        )
+        argument_parser.add_argument("-o", "--output", help="output file")
+        argument_parser.add_argument(
             "-p", "--processes",
             default=os.cpu_count(), type=int, help="number of processes"
         )
-    except Exception:
-        raise
-    return parser
+    except Exception as exception:
+        raise RuntimeError(
+            "failed to get argument parser\t: {}".format(exception)
+        )
+    return argument_parser
