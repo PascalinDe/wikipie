@@ -28,6 +28,7 @@ import logging
 
 # library specific imports
 import src.cli
+import src.xml
 import src.parser
 
 
@@ -41,16 +42,19 @@ def main():
         logger.info("input\t: %s", args.input)
         if args.output:
             logger.info("output\t: %s", args.output)
-            if args.mongoDB:
-                logger.info("output\t: %s", args.mongoDB)
         else:
             logger.info("output\t: stdout")
-            if args.mongoDB:
-                logger.info("output\t: %s", args.mongoDB)
         logger.info("parse wikitext")
         time0 = time.time()
-        parser = src.parser.Parser()
-        parser.parse_wikitext()
+        export_file_parser = src.xml.ExportFileParser(args.input, args.xsd)
+        language_attrib = export_file_parser.find_language_attrib()
+        logger.info("Wikipedia export file language\t: %s", language_attrib)
+        prop = ("title", "id", "ns", "revision")
+        for page_element in export_file_parser.find_page_elements(prop=prop):
+            msg = "found %s (Wikipedia page ID %s)"
+            logger.info(msg, page_element["title"], page_element["id"])
+            if page_element["ns"] == "0":
+                print(page_element["revision"])
         time1 = time.time()
         logger.info("parsed wikitext (%f sec)", time1 - time0)
     except Exception as exception:
