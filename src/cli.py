@@ -38,9 +38,6 @@ def get_argument_parser():
         argument_parser = argparse.ArgumentParser()
         argument_parser.add_argument("input", help="input file")
         argument_parser.add_argument("xsd", help="XSD")
-        argument_parser.add_argument(
-            "-m", "--mongoDB", help="mongoDB configuration file"
-        )
         argument_parser.add_argument("-o", "--output", help="output file")
         argument_parser.add_argument(
             "-p", "--processes",
