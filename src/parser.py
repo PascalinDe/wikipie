@@ -21,6 +21,7 @@
 
 
 # standard library imports
+import re
 # third party imports
 # library specific imports
 import pyparsing
@@ -33,6 +34,35 @@ class Parser(object):
         """Initialize wikitext parser."""
         return
 
-    def parse_wikitext(self):
-        """Parse wikitext."""
-        raise NotImplementedError
+    @staticmethod
+    def _find_paragraphs(wikitext):
+        """Find paragraphs.
+
+        :param str wikitext: wikitext
+
+        :returns: paragraphs
+        :rtype: list
+        """
+        try:
+            #: paragraph = 2*newline;
+            #: newline = U+000AU+000D | U+000DU+000A | U+000A | U+000D;
+            pattern = "(?:(?:\n\r)|(?:\r\n)|\n|\r){2}"
+            paragraphs = [
+                paragraph
+                for paragraph in re.split(pattern, wikitext) if paragraph
+            ]
+        except Exception as exception:
+            msg = "failed to find paragraphs\t: {}"
+            raise RuntimeError(msg.format(exception))
+        return paragraphs
+
+    def parse_wikitext(self, wikitext):
+        """Parse wikitext.
+
+        :param str wikitext: wikitext
+
+        :returns: wikitext
+        :rtype: dict
+        """
+        paragraphs = self._find_paragraphs(wikitext)
+        return paragraphs
