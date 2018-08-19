@@ -29,7 +29,7 @@ import logging
 # library specific imports
 import src.cli
 import src.xml
-import src.parser
+import src.page
 
 
 def main():
@@ -50,11 +50,21 @@ def main():
         language_attrib = export_file_parser.find_language_attrib()
         logger.info("Wikipedia export file language\t: %s", language_attrib)
         prop = ("title", "id", "ns", "revision")
+        pages = []
         for page_element in export_file_parser.find_page_elements(prop=prop):
-            msg = "found %s (Wikipedia page ID %s)"
-            logger.info(msg, page_element["title"], page_element["id"])
-            if page_element["ns"] == "0":
-                print(page_element["revision"])
+            for revision_element in page_element["revision"]:
+                page = src.page.Page(
+                    page_element["title"],
+                    page_element["id"],
+                    page_element["ns"],
+                    revision_element["id"],
+                    revision_element["text"]["text"]
+                )
+                pages.append(page)
+        for page in pages:
+            if page.ns == "0":
+                for section in page.sections:
+                    print(section, "\n")
         time1 = time.time()
         logger.info("parsed wikitext (%f sec)", time1 - time0)
     except Exception as exception:
