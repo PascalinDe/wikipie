@@ -63,8 +63,7 @@ def main():
                 pages.append(page)
         for page in pages:
             if page.ns == "0":
-                for section in page.sections:
-                    print(section, "\n")
+                print(page.pretty)
         time1 = time.time()
         logger.info("parsed wikitext (%f sec)", time1 - time0)
     except Exception as exception:

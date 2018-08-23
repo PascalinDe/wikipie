@@ -61,33 +61,31 @@ class Page(object):
         :returns: attribute value
         """
         if name == "sections":
-            value = self._find_sections(self.wikitext)
+            value = self._find_sections()
         elif name == "paragraphs":
-            sections = self._find_sections(self.wikitext)
-            value = self._find_paragraphs(sections)
+            value = self._find_paragraphs()
+        elif name == "pretty":
+            value = self._find_pretty()
         else:
             raise AttributeError
         return value
 
-    def _find_sections(self, wikitext):
+    def _find_sections(self):
         """Find sections.
-
-        :param str wikitext: wikitext
 
         :returns: sections
         :rtype: list
         """
-        return self.parser.find_sections(wikitext)
+        return self.parser.find_sections(self.wikitext)
 
-    def _find_paragraphs(self, sections):
+    def _find_paragraphs(self):
         """Find paragraphs.
-
-        :param list sections: sections
 
         :returns: paragraphs
         :rtype: list
         """
         try:
+            sections = self.sections
             paragraphs = [
                 self._find_paragraphs(section)
                 if isinstance(section, list)
@@ -98,3 +96,24 @@ class Page(object):
             msg = "failed to find paragraphs\t: {}"
             raise RuntimeError(msg.format(exception))
         return paragraphs
+
+    def _find_pretty(self):
+        """Find pretty print.
+
+        :returns: pretty
+        :rtype: str
+        """
+        try:
+            sections = self.sections
+            stack = [(0, node) for node in sections]
+            pretty = ""
+            while stack:
+                depth, node = stack.pop(0)
+                if node.label != "root":
+                    pretty += "{} {}\n".format(depth * "-", node.label)
+                for child in node.children[::-1]:
+                    stack.insert(0, (depth+1, child))
+        except Exception as exception:
+            msg = "failed to find pretty print\t: {}"
+            raise RuntimeError(msg.format(exception))
+        return pretty
