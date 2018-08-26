@@ -23,20 +23,21 @@
 # standard library imports
 import re
 import collections
+
 # third party imports
+
 # library specific imports
 import pyparsing
 
 
-Node = collections.namedtuple("Node", ["label", "children", "text"])
+Section = collections.namedtuple(
+    "Section", ["level", "heading", "wikitext", "subsections"]
+)
+Paragraph = collections.namedtuple("Paragraph", ["index", "wikitext"])
 
 
 class Parser(object):
     """Wikitext parser."""
-
-    def __init__(self):
-        """Initialize wikitext parser."""
-        return
 
     @staticmethod
     def find_sections(wikitext, level=2):
@@ -45,59 +46,57 @@ class Parser(object):
         :param str wikitext: wikitext
         :param int level: level
 
-        :returns: sections
-        :rtype: list
+        :returns: section
+        :rtype: Section
         """
         try:
             #: section_heading = ^, (2*6"=", unicode_char w/o "=",
             #: { unicode_char }-, 2*6"=" ) | ("<h[2-6]>", { unicode_char }-,
             #: "</h[2-6]>", $;
-            if not wikitext:
-                return [Node("root", [], "")]
+            format_string = (
+                r"^(?:={{{0}}}([^=].*?)={{{0}}})|(?:<h{0}>(.+?)</h{0}>)$"
+            )
+            pattern = re.compile(format_string.format(level), re.MULTILINE)
+            matches = [
+                match[0] if match[0] else match[1]
+                for match in pattern.findall(wikitext)
+            ]
+            if not matches:
+                return Section(level-1, "", wikitext, [])
             else:
                 format_string = (
-                    r"^(?:={{{0}}}([^=].*?)={{{0}}})|"
-                    r"(?:<h{0}>(.+?)</h{0}>)$"
+                    r"^(?:={{{0}}}(?:[^=].*?)={{{0}}})|"
+                    r"(?:<h{0}>(?:.+?)</h{0}>)$"
                 )
                 pattern = re.compile(
                     format_string.format(level), re.MULTILINE
                 )
-                matches = [
-                    match[0] if match[0] else match[1]
-                    for match in pattern.findall(wikitext)
+                splits = [
+                    split for split in pattern.split(wikitext) if split
                 ]
-                if not matches:
-                    return [Node("root", [], wikitext)]
-                else:
-                    format_string = (
-                        r"^(?:={{{0}}}(?:[^=].*?)={{{0}}})|"
-                        r"(?:<h{0}>(?:.+?)</h{0}>)$"
-                    )
-                    pattern = re.compile(
-                        format_string.format(level), re.MULTILINE
-                    )
-                    splits = [
-                        split for split in pattern.split(wikitext) if split
+                msg = (
+                    "number of section headings ({}) does not match "
+                    "number of sections ({})"
+                ).format(len(matches), len(splits)-1)
+                assert len(matches) == len(splits)-1, msg
+                if level == 6:
+                    subsections = [
+                        Section(level, heading, wikitext, [])
+                        for heading, wikitext in zip(matches, splits[1:])
                     ]
-                    msg = (
-                        "number of section headings ({}) does not match "
-                        "number of sections ({})"
-                    ).format(len(matches)+1, len(splits))
-                    assert len(matches)+1 == len(splits), msg
-                    if level == 6:
-                        return [
-                            Node(label, [], text)
-                            for label, text in zip(["root"]+matches, splits)
-                        ]
-                    else:
-                        nodes = [
-                            Parser.find_sections(split, level=level+1)
-                            for split in splits
-                        ]
-                        return [
-                            Node(label, children, "")
-                            for label, children in zip(["root"]+matches, nodes)
-                        ]
+                    section = Section(level-1, "", splits[0], subsections)
+                    return section
+                else:
+                    section = Section(level-1, "", splits[0], [])
+                    subsections = [
+                        Parser.find_sections(split, level=level+1)
+                        for split in splits[1:]
+                    ]
+                    subsections = [
+                        subsection._replace(heading=heading)
+                        for heading, subsection in zip(matches, subsections)
+                    ]
+                    return section._replace(subsections=subsections)
         except Exception as exception:
             msg = "failed to find sections\t: {}"
             raise RuntimeError(msg.format(exception))
@@ -116,21 +115,10 @@ class Parser(object):
             #: newline = U+000AU+000D | U+000DU+000A | U+000A | U+000D;
             pattern = r"(?:(?:\n\r)|(?:\r\n)|\n|\r){2}|(?:<br>)|(?:<br />)"
             paragraphs = [
-                paragraph
-                for paragraph in re.split(pattern, wikitext) if paragraph
+                Paragraph(index, wikitext)
+                for index, wikitext in enumerate(re.split(pattern, wikitext))
             ]
         except Exception as exception:
             msg = "failed to find paragraphs\t: {}"
             raise RuntimeError(msg.format(exception))
-        return paragraphs
-
-    def parse_wikitext(self, wikitext):
-        """Parse wikitext.
-
-        :param str wikitext: wikitext
-
-        :returns: wikitext
-        :rtype: dict
-        """
-        paragraphs = self.find_paragraphs(wikitext)
         return paragraphs
