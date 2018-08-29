@@ -227,6 +227,32 @@ class Page(object):
             else:
                 section = None
         except Exception as exception:
-            msg = "failed to find section {}".format(exception)
+            msg = "failed to find section\t: {}".format(exception)
             raise RuntimeError(msg)
         return section
+
+    def find_internal_links(self, wikitext):
+        """Find internal links.
+
+        :param str wikitext: wikitext
+
+        :returns: internal links
+        :rtype: list
+        """
+        try:
+            tokens = [
+                tokens
+                for tokens, _, _ in self.parser.find_internal_links(wikitext)
+            ]
+            internal_links = []
+            for token in tokens:
+                token = token[0]
+                if "anchor" in token:
+                    internal_link = (token["target"], token["anchor"])
+                else:
+                    internal_link = (token["target"], token["target"])
+                internal_links.append(internal_link)
+        except Exception as exception:
+            msg = "failed to find internal links\t: {}".format(exception)
+            raise RuntimeError(msg)
+        return internal_links

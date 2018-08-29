@@ -25,9 +25,10 @@ import re
 import collections
 
 # third party imports
+import pyparsing
 
 # library specific imports
-import pyparsing
+import src.parser_elements.links
 
 
 Section = collections.namedtuple(
@@ -122,3 +123,19 @@ class Parser(object):
             msg = "failed to find paragraphs\t: {}"
             raise RuntimeError(msg.format(exception))
         return paragraphs
+
+    @staticmethod
+    def find_internal_links(wikitext):
+        """Find internal links.
+
+        :param str wikitext: wikitext
+
+        :returns: internal links
+        :rtype: list
+        """
+        try:
+            internal_links = src.parser_elements.links.INTERNAL_LINK.scanString(wikitext)
+        except Exception as exception:
+            msg = "failed to find internal links\t: {}"
+            raise RuntimeError(msg.format(exception))
+        return internal_links
