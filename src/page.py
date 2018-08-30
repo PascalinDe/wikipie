@@ -240,18 +240,7 @@ class Page(object):
         :rtype: list
         """
         try:
-            tokens = [
-                tokens
-                for tokens, _, _ in self.parser.find_internal_links(wikitext)
-            ]
-            internal_links = []
-            for token in tokens:
-                token = token[0]
-                if "anchor" in token:
-                    internal_link = (token["target"], token["anchor"])
-                else:
-                    internal_link = (token["target"], token["target"])
-                internal_links.append(internal_link)
+            internal_links = self.parser.find_internal_links(wikitext)
         except Exception as exception:
             msg = "failed to find internal links\t: {}".format(exception)
             raise RuntimeError(msg)

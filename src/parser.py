@@ -35,6 +35,7 @@ Section = collections.namedtuple(
     "Section", ["level", "heading", "wikitext", "subsections"]
 )
 Paragraph = collections.namedtuple("Paragraph", ["index", "wikitext"])
+InternalLink = collections.namedtuple("InternalLink", ["target", "anchor"])
 
 
 class Parser(object):
@@ -134,7 +135,24 @@ class Parser(object):
         :rtype: list
         """
         try:
-            internal_links = src.parser_elements.links.INTERNAL_LINK.scanString(wikitext)
+            parser_element = src.parser_elements.links.internal_link(
+                "internal_link", "internal_link", list_all_matches=True
+            )
+            tokens = [
+                tokens for tokens, _, _ in parser_element.scanString(wikitext)
+            ]
+            internal_links = []
+            for token in tokens:
+                token = token[0]
+                if "anchor" in token:
+                    internal_link = InternalLink(
+                        token["target"], token["anchor"]
+                    )
+                else:
+                    internal_link = InternalLink(
+                        token["target"], token["target"]
+                    )
+                internal_links.append(internal_link)
         except Exception as exception:
             msg = "failed to find internal links\t: {}"
             raise RuntimeError(msg.format(exception))

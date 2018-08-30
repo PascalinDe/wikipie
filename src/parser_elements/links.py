@@ -30,29 +30,45 @@ import pyparsing
 
 
 #: https://www.mediawiki.org/wiki/Help:Interwiki_linking
+def internal_link(name, results_name, list_all_matches=False, debug=False):
+    """Returns internal link parser element.
 
+    internal_link = "[[", target, [ [ "|" ], anchor ], "]]";
+    target = { printable w/o "[]|" }-;
+    anchor = { printable w/o "[]" }-;
 
-#: internal_link = "[[", target, [ "|", anchor ], "]]";
-#: target = { printables }-;
-#: anchor = { anchor }-;
-INTERNAL_LINK_OPENING = pyparsing.Literal("[[")
+    :param str name: name
+    :param str results_name: results name
+    :param bool debug: toggle debug messages on/off
 
-TARGET = pyparsing.Word(
-    string.printable.replace("[\\]", "").replace("|", "")
-).setResultsName("target")
-TARGET.setName("target")
-
-ANCHOR = pyparsing.Word(
-    string.printable.replace("[\\]", "")
-).setResultsName("anchor")
-ANCHOR.setName("anchor")
-
-INTERNAL_LINK_CLOSING = pyparsing.Literal("]]")
-
-INTERNAL_LINK = pyparsing.Combine(
-    INTERNAL_LINK_OPENING
-    + TARGET
-    + pyparsing.Optional(pyparsing.Literal("|") + ANCHOR)
-    + INTERNAL_LINK_CLOSING
-).setResultsName("internal_link", listAllMatches=True)
-INTERNAL_LINK.setName("internal_link")
+    :returns: internal link
+    :rtype: ParserElement
+    """
+    try:
+        printable = string.printable.replace("[\\]", "")
+        internal_link_opening = pyparsing.Literal("[[")
+        target = pyparsing.Word(
+            printable.replace("|", "")
+        ).setResultsName("target")
+        target.setName("target")
+        if debug:
+            target.setDebug()
+        pipe = pyparsing.Literal("|")
+        anchor = pyparsing.Word(printable).setResultsName("anchor")
+        anchor.setName("anchor")
+        if debug:
+            anchor.setDebug()
+        internal_link_closing = pyparsing.Literal("]]")
+        internal_link = pyparsing.Combine(
+            internal_link_opening
+            + target
+            + pyparsing.Optional(pyparsing.Optional(pipe) + anchor)
+            + internal_link_closing
+        ).setResultsName(results_name, listAllMatches=list_all_matches)
+        internal_link.setName(name)
+        if debug:
+            internal_link.setDebug()
+    except Exception as exception:
+        msg = "failed to return internal link\t: {}"
+        raise RuntimeError(msg.format(exception))
+    return internal_link
