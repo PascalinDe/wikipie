@@ -30,43 +30,47 @@ import pyparsing
 
 
 #: https://www.mediawiki.org/wiki/Help:Interwiki_linking
-def internal_link(name, results_name, list_all_matches=False, debug=False):
+#: https://en.wikipedia.org/wiki/Wikipedia:Namespace
+def internal_link(namespaces, flag=False):
     """Returns internal link parser element.
 
-    internal_link = "[[", target, [ [ "|" ], anchor ], "]]";
-    target = { printable w/o "[]|" }-;
-    anchor = { printable w/o "[]" }-;
+    internal_link =
+    "[[", [ [ namespace ], ":" ], page_name, [ [ "|" ], anchor ], "]]";
+    namespace = any namespace;
+    page_name = { printable w/o "#<>[]_{|}" }-
+    anchor = { printable w/o "#<>[]_{|}" }-;
 
-    :param str name: name
-    :param str results_name: results name
-    :param bool debug: toggle debug messages on/off
+    :param list namespaces: namespaces
+    :param bool flag: toggle debug messages on/off
 
     :returns: internal link
     :rtype: ParserElement
     """
     try:
-        printable = string.printable.replace("[\\]", "")
+        printable = "".join(
+            char for char in string.printable if char not in "#<>[]_{|}"
+        )
         internal_link_opening = pyparsing.Literal("[[")
-        target = pyparsing.Word(
-            printable.replace("|", "")
-        ).setResultsName("target")
-        target.setName("target")
-        if debug:
-            target.setDebug()
+        colon = pyparsing.Literal(":")
+        namespace = pyparsing.Or(
+            pyparsing.CaselessKeyword(namespace) for namespace in namespaces
+        ).setResultsName("namespace")
+        namespace.setName("namespace")
+        page_name = pyparsing.Word(printable).setResultsName("page_name")
+        page_name.setName("page_name")
         pipe = pyparsing.Literal("|")
         anchor = pyparsing.Word(printable).setResultsName("anchor")
         anchor.setName("anchor")
-        if debug:
-            anchor.setDebug()
         internal_link_closing = pyparsing.Literal("]]")
         internal_link = pyparsing.Combine(
             internal_link_opening
-            + target
+            + pyparsing.Optional(colon + pyparsing.Optional(namespace))
+            + page_name
             + pyparsing.Optional(pyparsing.Optional(pipe) + anchor)
             + internal_link_closing
-        ).setResultsName(results_name, listAllMatches=list_all_matches)
-        internal_link.setName(name)
-        if debug:
+        ).setResultsName("internal_link", listAllMatches=True)
+        internal_link.setName("internal_link")
+        if flag:
             internal_link.setDebug()
     except Exception as exception:
         msg = "failed to return internal link\t: {}"

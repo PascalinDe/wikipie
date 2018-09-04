@@ -40,7 +40,7 @@ class Page(object):
     :ivar Parser parser: wikitext parser
     """
 
-    def __init__(self, title, id_, ns, revision_id, wikitext):
+    def __init__(self, title, id_, ns, revision_id, wikitext, parser):
         """Initialize root.
 
         :param str title: title
@@ -48,6 +48,7 @@ class Page(object):
         :param str ns: ns
         :param str revision_id: revision id
         :param str wikitext: wikitext
+        :param Parser parser: wikitext parser
         """
         try:
             self.title = title
@@ -55,7 +56,7 @@ class Page(object):
             self.ns = ns
             self.revision_id = revision_id
             self.wikitext = wikitext
-            self.parser = src.parser.Parser()
+            self.parser = parser
         except Exception as exception:
             msg = "failed to initialize root\t: {}"
             raise RuntimeError(msg.format(exception))

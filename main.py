@@ -30,6 +30,7 @@ import logging
 import src.cli
 import src.xml
 import src.page
+import src.parser
 
 
 def main():
@@ -49,6 +50,11 @@ def main():
         export_file_parser = src.xml.ExportFileParser(args.input, args.xsd)
         language_attrib = export_file_parser.find_language_attrib()
         logger.info("Wikipedia export file language\t: %s", language_attrib)
+        namespace_elements = export_file_parser.find_namespace_elements()
+        logger.info(
+            "Namespaces\t: %s", ", ".join(namespace_elements.values())
+        )
+        parser = src.parser.Parser(namespace_elements)
         prop = ("title", "id", "ns", "revision")
         pages = []
         for page_element in export_file_parser.find_page_elements(prop=prop):
@@ -58,12 +64,15 @@ def main():
                     page_element["id"],
                     page_element["ns"],
                     revision_element["id"],
-                    revision_element["text"]["text"]
+                    revision_element["text"]["text"],
+                    parser
                 )
                 pages.append(page)
         for page in pages:
             if page.ns == "0":
-                print(page.pretty)
+                section = page.find_section("Companions")
+                internal_links = page.find_internal_links(section.wikitext)
+                print(internal_links)
         time1 = time.time()
         logger.info("parsed wikitext (%f sec)", time1 - time0)
     except Exception as exception:

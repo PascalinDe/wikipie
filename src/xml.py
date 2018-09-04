@@ -88,6 +88,39 @@ class ExportFileParser(object):
             raise RuntimeError(msg)
         return language_attrib
 
+    def find_siteinfo_element(self):
+        """Find siteinfo element.
+
+        :returns: siteinfo element
+        :rtype: Element
+        """
+        try:
+            siteinfo_element = self.tree.find("{*}siteinfo")
+        except Exception as exception:
+            msg = "failed to find siteinfo element\t: {}".format(exception)
+            raise RuntimeError(msg)
+        return siteinfo_element
+
+    def find_namespace_elements(self):
+        """Find namespace elements.
+
+        :returns: namespace elements
+        :rtype: dict
+        """
+        try:
+            siteinfo_element = self.find_siteinfo_element()
+            namespaces_element = siteinfo_element.find("{*}namespaces")
+            namespace_elements = {}
+            for element in namespaces_element.iterfind("{*}namespace"):
+                if element.text is not None:
+                    namespace_elements[element.attrib["key"]] = element.text
+                else:
+                    namespace_elements[element.attrib["key"]] = "(Main)"
+        except Exception as exception:
+            msg = "failed to find namespace elements\t: {}".format(exception)
+            raise RuntimeError(msg)
+        return namespace_elements
+
     def find_page_elements(self, prop=("title", "ns", "id")):
         """Find page elements.
 

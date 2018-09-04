@@ -35,11 +35,31 @@ Section = collections.namedtuple(
     "Section", ["level", "heading", "wikitext", "subsections"]
 )
 Paragraph = collections.namedtuple("Paragraph", ["index", "wikitext"])
-InternalLink = collections.namedtuple("InternalLink", ["target", "anchor"])
+InternalLink = collections.namedtuple(
+    "InternalLink", ["namespace", "page_name", "anchor"]
+)
 
 
 class Parser(object):
-    """Wikitext parser."""
+    """Wikitext parser.
+
+    :ivar dict namespaces: namespaces
+    :ivar bool flag: toggle debug messages on/off
+    """
+
+    def __init__(self, namespaces, flag=False):
+        """Initialize wikitext parser.
+
+        :param dict namespaces: namespaces
+        :param bool flag: toggle debug messages on/off
+        """
+        try:
+            self.namespaces = namespaces
+            self.flag = flag
+        except Exception as exception:
+            msg = "failed to initialize wikitext parser\t: {}"
+            raise RuntimeError(msg.format(exception))
+        return
 
     @staticmethod
     def find_sections(wikitext, level=2):
@@ -125,8 +145,7 @@ class Parser(object):
             raise RuntimeError(msg.format(exception))
         return paragraphs
 
-    @staticmethod
-    def find_internal_links(wikitext):
+    def find_internal_links(self, wikitext):
         """Find internal links.
 
         :param str wikitext: wikitext
@@ -135,8 +154,9 @@ class Parser(object):
         :rtype: list
         """
         try:
+            namespaces = [v for k, v in self.namespaces.items() if k != "0"]
             parser_element = src.parser_elements.links.internal_link(
-                "internal_link", "internal_link", list_all_matches=True
+                namespaces, flag=self.flag
             )
             tokens = [
                 tokens for tokens, _, _ in parser_element.scanString(wikitext)
@@ -144,15 +164,18 @@ class Parser(object):
             internal_links = []
             for token in tokens:
                 token = token[0]
-                if "anchor" in token:
-                    internal_link = InternalLink(
-                        token["target"], token["anchor"]
-                    )
+                if "namespace" in token:
+                    namespace = token["namespace"]
                 else:
-                    internal_link = InternalLink(
-                        token["target"], token["target"]
-                    )
-                internal_links.append(internal_link)
+                    namespace = self.namespaces["0"]
+                page_name = token["page_name"]
+                if "anchor" in token:
+                    anchor = token["anchor"]
+                else:
+                    anchor = page_name
+                internal_links.append(
+                    InternalLink(namespace, page_name, anchor)
+                )
         except Exception as exception:
             msg = "failed to find internal links\t: {}"
             raise RuntimeError(msg.format(exception))
