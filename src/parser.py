@@ -28,16 +28,8 @@ import collections
 import pyparsing
 
 # library specific imports
+import src.page_elements
 import src.parser_elements.links
-
-
-Section = collections.namedtuple(
-    "Section", ["level", "heading", "wikitext", "subsections"]
-)
-Paragraph = collections.namedtuple("Paragraph", ["index", "wikitext"])
-InternalLink = collections.namedtuple(
-    "InternalLink", ["namespace", "page_name", "anchor"]
-)
 
 
 class Parser(object):
@@ -84,7 +76,7 @@ class Parser(object):
                 for match in pattern.findall(wikitext)
             ]
             if not matches:
-                return Section(level-1, "", wikitext, [])
+                return src.page_elements.Section(level-1, "", wikitext, [])
             else:
                 format_string = (
                     r"^(?:={{{0}}}(?:[^=].*?)={{{0}}})|"
@@ -103,13 +95,17 @@ class Parser(object):
                 assert len(matches) == len(splits)-1, msg
                 if level == 6:
                     subsections = [
-                        Section(level, heading, wikitext, [])
+                        src.page_elements.Section(level, heading, wikitext, [])
                         for heading, wikitext in zip(matches, splits[1:])
                     ]
-                    section = Section(level-1, "", splits[0], subsections)
+                    section = src.page_elements.Section(
+                        level-1, "", splits[0], subsections
+                    )
                     return section
                 else:
-                    section = Section(level-1, "", splits[0], [])
+                    section = src.page_elements.Section(
+                        level-1, "", splits[0], []
+                    )
                     subsections = [
                         Parser.find_sections(split, level=level+1)
                         for split in splits[1:]
@@ -137,7 +133,7 @@ class Parser(object):
             #: newline = U+000AU+000D | U+000DU+000A | U+000A | U+000D;
             pattern = r"(?:(?:\n\r)|(?:\r\n)|\n|\r){2}|(?:<br>)|(?:<br />)"
             paragraphs = [
-                Paragraph(index, wikitext)
+                src.page_elements.Paragraph(index, wikitext)
                 for index, wikitext in enumerate(re.split(pattern, wikitext))
             ]
         except Exception as exception:
@@ -173,8 +169,12 @@ class Parser(object):
                     anchor = token["anchor"]
                 else:
                     anchor = page_name
+                if "word_ending" in token:
+                    anchor += token["word_ending"]
                 internal_links.append(
-                    InternalLink(namespace, page_name, anchor)
+                    src.page_elements.InternalLink(
+                        namespace, page_name, anchor
+                    )
                 )
         except Exception as exception:
             msg = "failed to find internal links\t: {}"

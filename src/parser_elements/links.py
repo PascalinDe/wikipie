@@ -16,7 +16,7 @@
 
 
 """
-:synopsis:
+:synopsis: Links parser elements.
 """
 
 
@@ -35,10 +35,12 @@ def internal_link(namespaces, flag=False):
     """Returns internal link parser element.
 
     internal_link =
-    "[[", [ [ namespace ], ":" ], page_name, [ [ "|" ], anchor ], "]]";
+    "[[", [ [ namespace ], ":" ], page_name, [ [ "|" ], anchor ], "]]",
+    word_ending;
     namespace = any namespace;
-    page_name = { printable w/o "#<>[]_{|}" }-
+    page_name = { printable w/o "#<>[]_{|}" }-;
     anchor = { printable w/o "#<>[]_{|}" }-;
+    word_ending = { ascii_letter }-;
 
     :param list namespaces: namespaces
     :param bool flag: toggle debug messages on/off
@@ -62,12 +64,17 @@ def internal_link(namespaces, flag=False):
         anchor = pyparsing.Word(printable).setResultsName("anchor")
         anchor.setName("anchor")
         internal_link_closing = pyparsing.Literal("]]")
+        word_ending = pyparsing.Word(
+            string.ascii_letters
+        ).setResultsName("word_ending")
+        word_ending.setName("word_ending")
         internal_link = pyparsing.Combine(
             internal_link_opening
             + pyparsing.Optional(colon + pyparsing.Optional(namespace))
             + page_name
             + pyparsing.Optional(pyparsing.Optional(pipe) + anchor)
             + internal_link_closing
+            + pyparsing.Optional(word_ending)
         ).setResultsName("internal_link", listAllMatches=True)
         internal_link.setName("internal_link")
         if flag:
