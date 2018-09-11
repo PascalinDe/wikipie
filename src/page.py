@@ -26,7 +26,6 @@ import json
 # third party imports
 
 # library specific imports
-import src.parser
 
 
 class Page(object):
@@ -58,47 +57,42 @@ class Page(object):
             self.wikitext = wikitext
             self.parser = parser
         except Exception as exception:
-            msg = "failed to initialize root\t: {}"
-            raise RuntimeError(msg.format(exception))
+            msg = "failed to initialize root:{}".format(exception)
+            raise RuntimeError(msg)
         return
 
-    def __getattr__(self, name):
-        """Get attribute.
+    @staticmethod
+    def _search_depth_first(section):
+        """Depth-first search.
 
-        :param str name: name
+        :param Section section: section
 
-        :returns: attribute value
+        :returns: iterator object
         """
-        if name == "sections":
-            value = self.find_sections(self.wikitext)
-        elif name == "paragraphs":
-            section = self.sections
-            value = self.find_paragraphs(section=section)
-        elif name == "pretty":
-            value = self.find_pretty()
-        elif name == "toc":
-            section = self.sections
-            value = self.find_toc(section)
-        else:
-            msg = "does not have attribute '{}'".format(name)
+        try:
+            stack = [section]
+            while stack:
+                section = stack.pop(0)
+                for subsection in section.subsections[::-1]:
+                    stack.insert(0, subsection)
+                yield section
+        except Exception as exception:
+            msg = "failed to do depth-first search:{}".format(exception)
             raise RuntimeError(msg)
-        return value
 
-    def find_sections(self, wikitext, level=2):
-        """Find sections.
-
-        :param str wikitext: wikitext
-        :param int level: level
+    @property
+    def section(self):
+        """(Root) section.
 
         :returns: section
         :rtype: Section
         """
         try:
-            section = self.parser.find_sections(self.wikitext, level=level)
+            section = self.parser.find_sections(self.wikitext, level=2)
             section = section._replace(heading=self.title)
         except Exception as exception:
-            msg = "failed to find sections\t: {}"
-            raise RuntimeError(msg.format(exception))
+            msg = "failed to find section:{}".format(exception)
+            raise RuntimeError(msg)
         return section
 
     def find_paragraphs(self, section=None):
@@ -112,47 +106,36 @@ class Page(object):
         try:
             if not section:
                 section = self.section
-            stack = [section]
-            paragraphs = []
-            while stack:
-                section = stack.pop(0)
-                paragraphs.append(
-                    (
-                        section.heading,
-                        self.parser.find_paragraphs(section.wikitext)
-                    )
-                )
-                for subsection in section.subsections[::-1]:
-                    stack.insert(0, subsection)
+            paragraphs = [
+                self.parser.find_paragraphs(value.wikitext)
+                for value in self._search_depth_first(section)
+            ]
         except Exception as exception:
-            msg = "failed to find paragraphs\t: {}"
-            raise RuntimeError(msg.format(exception))
+            msg = "failed to find paragraphs:{}".format(exception)
+            raise RuntimeError(msg)
         return paragraphs
 
-    def find_pretty(self):
-        """Find pretty print.
+    def find_prettyprint(self, section):
+        """Find prettyprint.
 
-        :returns: pretty
+        :param Section section: section
+
+        :returns: prettyprint
         :rtype: str
         """
         try:
-            section = self.find_sections(self.wikitext)
-            stack = [section]
-            pretty = ""
-            while stack:
-                section = stack.pop(0)
-                if section.level > 1:
-                    pretty += "|{} {}\n".format(
-                        section.level*"-", section.heading
+            prettyprint = ""
+            for value in self._search_depth_first(section):
+                if value.level > 1:
+                    prettyprint += "|{} {}\n".format(
+                        value.level*"-", value.heading
                     )
                 else:
-                    pretty += "{} {}\n".format("-", section.heading)
-                for subsection in section.subsections[::-1]:
-                    stack.insert(0, subsection)
+                    prettyprint += "{} {}\n".format("-", value.heading)
         except Exception as exception:
-            msg = "failed to find pretty print\t: {}"
-            raise RuntimeError(msg.format(exception))
-        return pretty
+            msg = "failed to find prettyprint:{}".format(exception)
+            raise RuntimeError(msg)
+        return prettyprint
 
     def _find_toc(self, section, level=1):
         """Find table of contents.
@@ -161,7 +144,7 @@ class Page(object):
         :param int level: level
 
         :returns: table of contents
-        :rtype: str
+        :rtype: dict
         """
         try:
             if level == 5:
@@ -171,17 +154,16 @@ class Page(object):
                         for subsection in section.subsections
                     ]
                 }
-                return toc
             else:
                 subsections = [
                     self._find_toc(subsection, level=level+1)
                     for subsection in section.subsections
                 ]
                 toc = {section.heading: subsections}
-                return toc
         except Exception as exception:
-            msg = "failed to find table of contents\t: {}"
+            msg = "failed to find table of contents:{}"
             raise RuntimeError(msg.format(exception))
+        return toc
 
     def find_toc(self, section, level=1, file_format="json"):
         """Find table of contents.
@@ -198,12 +180,12 @@ class Page(object):
             if file_format == "json":
                 toc = json.dumps(toc)
             else:
-                msg = "file format {} is not supported".format(file_format)
+                msg = "{} file format is not supported".format(file_format)
                 raise RuntimeError(msg)
         except RuntimeError:
             raise
         except Exception as exception:
-            msg = "failed to find table of contents {}".format(exception)
+            msg = "failed to find table of contents:{}".format(exception)
             raise RuntimeError(msg)
         return toc
 
@@ -213,22 +195,16 @@ class Page(object):
         :param str heading: heading
 
         :returns: section
-        :rtype: Section
+        :rtype: Section or None
         """
         try:
-            section = self.sections
-            stack = [section]
-            while stack:
-                section = stack.pop(0)
+            for section in self._search_depth_first(self.section):
                 if section.heading == heading:
                     break
-                else:
-                    for subsection in section.subsections:
-                        stack.insert(0, subsection)
             else:
                 section = None
         except Exception as exception:
-            msg = "failed to find section\t: {}".format(exception)
+            msg = "failed to find section:{}".format(exception)
             raise RuntimeError(msg)
         return section
 
@@ -243,6 +219,6 @@ class Page(object):
         try:
             internal_links = self.parser.find_internal_links(wikitext)
         except Exception as exception:
-            msg = "failed to find internal links\t: {}".format(exception)
+            msg = "failed to find internal links:{}".format(exception)
             raise RuntimeError(msg)
         return internal_links
