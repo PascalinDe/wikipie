@@ -40,19 +40,21 @@ def main():
         logger = logging.getLogger(name=main.__name__)
         argument_parser = src.cli.get_argument_parser()
         args = argument_parser.parse_args()
-        logger.info("input\t: %s", args.input)
+        logger.info("input file:%s", args.input)
         if args.output:
-            logger.info("output\t: %s", args.output)
+            logger.info("output file:%s", args.output)
         else:
-            logger.info("output\t: stdout")
+            logger.info("output:stdout")
         logger.info("parse wikitext")
         time0 = time.time()
         export_file_parser = src.xml.ExportFileParser(args.input, args.xsd)
         language_attrib = export_file_parser.find_language_attrib()
-        logger.info("Wikipedia export file language\t: %s", language_attrib)
+        logger.info("Wikipedia export file language:%s", language_attrib)
         namespace_elements = export_file_parser.find_namespace_elements()
         logger.info(
-            "Namespaces\t: %s", ", ".join(namespace_elements.values())
+            "namespaces:%s", ", ".join(
+                "'%s'" % value for value in namespace_elements.values()
+            )
         )
         parser = src.parser.Parser(namespace_elements)
         prop = ("title", "id", "ns", "revision")
@@ -70,13 +72,17 @@ def main():
                 pages.append(page)
         for page in pages:
             if page.ns == "0":
-                section = page.find_section("Companions")
+                print(page.find_toc(page.section))
+                print(page.find_prettyprint(page.section))
+                section = page.find_section("Adversaries")
+                print(section)
                 internal_links = page.find_internal_links(section.wikitext)
                 print(internal_links)
         time1 = time.time()
         logger.info("parsed wikitext (%f sec)", time1 - time0)
     except Exception as exception:
-        raise RuntimeError("failed to parse wikitext\t: {}".format(exception))
+        msg = "failed to parse wikitext:{}".format(exception)
+        raise RuntimeError(msg)
     return
 
 
