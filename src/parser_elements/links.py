@@ -31,16 +31,124 @@ import pyparsing
 
 #: https://www.mediawiki.org/wiki/Help:Interwiki_linking
 #: https://en.wikipedia.org/wiki/Wikipedia:Namespace
-def internal_link(namespaces, flag=False):
-    """Returns internal link parser element.
+#: https://en.wikipedia.org/wiki/Wikipedia:Article_titles
+
+
+def _get_namespace(namespaces, flag=False):
+    """Get namespace parser element.
+
+    namespace = any namespace;
+
+    :param bool flag: toggle debug messages on/off
+    :param list namespaces: list of namespaces
+
+    :returns: namespace
+    :rtype: ParserElement
+    """
+    try:
+        namespace = pyparsing.Or(
+            pyparsing.CaselessLiteral(namespace)
+            for namespace in namespaces
+        )
+        if flag:
+            namespace.setDebug()
+        namespace.setName("namespace")
+        namespace = namespace.setResultsName("namespace")
+    except Exception as exception:
+        msg = "failed to get namespace parser element:{}".format(exception)
+        raise RuntimeError(msg)
+    return namespace
+
+
+def _get_page_name(flag=False):
+    """Get page_name parser element.
+
+    :param bool flag: toggle debug messages on/off
+
+    page_name = printable w/o "#:<>[]_{|}", { printable w/o "#<>[]_{|}" };
+
+    :returns: page_name
+    :rtype: ParserElement
+    """
+    try:
+        initChars = "".join(
+            char for char in string.printable if char not in "#:<>[]_{|}"
+        )
+        bodyChars = "".join(
+            char for char in string.printable if char not in "#<>[]_{|}"
+        )
+        page_name = pyparsing.Word(
+            initChars, bodyChars=bodyChars
+        )
+        page_name.leaveWhitespace()
+        page_name.parseWithTabs()
+        if flag:
+            page_name.setDebug()
+        page_name.setName("page_name")
+        page_name = page_name.setResultsName("page_name")
+    except Exception as exception:
+        msg = "failed to get page_name parser element:{}".format(exception)
+        raise RuntimeError(msg)
+    return page_name
+
+
+def _get_anchor(flag=False):
+    """Get anchor parser element.
+
+    :param bool flag: toggle debug messages on/off
+
+    anchor = { printable w/o "#<>[]_{|}" }-;
+
+    :returns: anchor parser element
+    :rtype: ParserElement
+    """
+    try:
+        initChars = "".join(
+            char for char in string.printable if char not in "#<>[]_{|}"
+        )
+        anchor = pyparsing.Word(initChars)
+        anchor.leaveWhitespace()
+        anchor.parseWithTabs()
+        if flag:
+            anchor.setDebug()
+        anchor.setName("anchor")
+        anchor = anchor.setResultsName("anchor")
+    except Exception as exception:
+        msg = "failed to get anchor parser element:{}".format(exception)
+        raise RuntimeError(msg)
+    return anchor
+
+
+def _get_word_ending(flag=False):
+    """Get word_ending parser element.
+
+    :param bool flag: toggle debug messages on/off
+
+    word_ending = { ascii_letter }-;
+
+    :returns: word_ending
+    :rtype: ParserElement
+    """
+    try:
+        word_ending = pyparsing.Word(
+            string.ascii_letters
+        )
+        if flag:
+            word_ending.setDebug()
+        word_ending.setName("word_ending")
+        word_ending.setResultsName("word_ending")
+    except Exception as exception:
+        msg = "failed to get word_ending:{}".format(exception)
+        raise RuntimeError(msg)
+    return word_ending
+
+
+def get_internal_link(namespaces, flag=False):
+    """Get internal link parser element.
 
     internal_link =
-    "[[", [ [ namespace ], ":" ], page_name, [ [ "|" ], anchor ], "]]",
+    "[[", [ [ namespace ], ":" ], page_name, [ "|", [ anchor ] ], "]]",
     word_ending;
-    namespace = any namespace;
-    page_name = { printable w/o "#<>[]_{|}" }-;
-    anchor = { printable w/o "#<>[]_{|}" }-;
-    word_ending = { ascii_letter }-;
 
     :param list namespaces: namespaces
     :param bool flag: toggle debug messages on/off
@@ -49,37 +157,59 @@ def internal_link(namespaces, flag=False):
     :rtype: ParserElement
     """
     try:
-        printable = "".join(
-            char for char in string.printable if char not in "#<>[]_{|}"
-        )
         internal_link_opening = pyparsing.Literal("[[")
+        namespace = _get_namespace(namespaces, flag=flag)
         colon = pyparsing.Literal(":")
-        namespace = pyparsing.Or(
-            pyparsing.CaselessKeyword(namespace) for namespace in namespaces
-        ).setResultsName("namespace")
-        namespace.setName("namespace")
-        page_name = pyparsing.Word(printable).setResultsName("page_name")
-        page_name.setName("page_name")
+        page_name = _get_page_name(flag=flag)
         pipe = pyparsing.Literal("|")
-        anchor = pyparsing.Word(printable).setResultsName("anchor")
-        anchor.setName("anchor")
+        anchor = _get_anchor(flag=flag)
         internal_link_closing = pyparsing.Literal("]]")
-        word_ending = pyparsing.Word(
-            string.ascii_letters
-        ).setResultsName("word_ending")
-        word_ending.setName("word_ending")
+        word_ending = _get_word_ending(flag=flag)
         internal_link = pyparsing.Combine(
             internal_link_opening
             + pyparsing.Optional(colon + pyparsing.Optional(namespace))
             + page_name
-            + pyparsing.Optional(pyparsing.Optional(pipe) + anchor)
+            + pyparsing.Optional(pipe + pyparsing.Optional(anchor))
             + internal_link_closing
             + pyparsing.Optional(word_ending)
-        ).setResultsName("internal_link", listAllMatches=True)
-        internal_link.setName("internal_link")
+        )
+        internal_link.leaveWhitespace()
+        internal_link.parseWithTabs()
         if flag:
             internal_link.setDebug()
+        internal_link.setName("internal_link")
+        internal_link.setResultsName("internal_link")
     except Exception as exception:
-        msg = "failed to return internal link\t: {}"
-        raise RuntimeError(msg.format(exception))
+        msg = "failed to return internal link:{}".format(exception)
+        raise RuntimeError(msg)
     return internal_link
+
+
+def get_redirect(namespaces, flag=False):
+    """"Get redirect parser element.
+
+    redirect = "#REDIRECT", space | tab, internal_link;
+
+    :param list namespaces: namespaces
+    :param bool flag: toggle debug messages on/off
+
+    :returns: redirect
+    :rtype: ParserElement
+    """
+    try:
+        internal_link = get_internal_link(namespaces, flag=flag)
+        redirect = pyparsing.Combine(
+            pyparsing.Literal("#REDIRECT")
+            + pyparsing.White(ws=" \t", exact=1)
+            + internal_link
+        )
+        redirect.leaveWhitespace()
+        redirect.parseWithTabs()
+        if flag:
+            redirect.setDebug()
+        redirect.setName("redirect")
+        redirect.setResultsName("redirect")
+    except Exception as exception:
+        msg = "failed to return redirect:{}".format(exception)
+        raise RuntimeError(msg)
+    return redirect

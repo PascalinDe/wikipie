@@ -151,7 +151,7 @@ class Parser(object):
         """
         try:
             namespaces = [v for k, v in self.namespaces.items() if k != "0"]
-            parser_element = src.parser_elements.links.internal_link(
+            parser_element = src.parser_elements.links.get_internal_link(
                 namespaces, flag=self.flag
             )
             tokens = [
@@ -159,7 +159,6 @@ class Parser(object):
             ]
             internal_links = []
             for token in tokens:
-                token = token[0]
                 if "namespace" in token:
                     namespace = token["namespace"]
                 else:
