@@ -136,7 +136,7 @@ def _get_word_ending(flag=False):
         if flag:
             word_ending.setDebug()
         word_ending.setName("word_ending")
-        word_ending.setResultsName("word_ending")
+        word_ending = word_ending.setResultsName("word_ending")
     except Exception as exception:
         msg = "failed to get word_ending:{}".format(exception)
         raise RuntimeError(msg)

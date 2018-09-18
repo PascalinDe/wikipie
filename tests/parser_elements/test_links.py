@@ -48,9 +48,7 @@ class TestLinks(unittest.TestCase):
             namespaces = next(reader)
         return namespaces
 
-    @hypothesis.given(
-        strategies.links.namespace()
-    )
+    @hypothesis.given(strategies.links.namespace())
     def test_namespace_00(self, namespace):
         """Test namespace parser element.
 
@@ -62,9 +60,7 @@ class TestLinks(unittest.TestCase):
         self.assertEqual(namespace, parse_results["namespace"])
         return
 
-    @hypothesis.given(
-        strategies.links.page_name(1, 16)
-    )
+    @hypothesis.given(strategies.links.page_name(1, 16))
     def test_page_name_00(self, page_name):
         """Test page_name parser element.
 
@@ -75,9 +71,29 @@ class TestLinks(unittest.TestCase):
         self.assertEqual(page_name, parse_results["page_name"])
         return
 
-    @hypothesis.given(
-        strategies.links.page_name(1, 16)
-    )
+    @hypothesis.given(strategies.links.anchor(1, 16))
+    def test_anchor_00(self, anchor):
+        """Test anchor parser element.
+
+        :param str anchor: anchor
+        """
+        parser_element = links._get_anchor()
+        parse_results = parser_element.parseString(anchor)
+        self.assertEqual(anchor, parse_results["anchor"])
+        return
+
+    @hypothesis.given(strategies.links.word_ending(1, 16))
+    def test_word_ending_00(self, word_ending):
+        """Test word_ending parser element.
+
+        :param str word_ending: word_ending
+        """
+        parser_element = links._get_word_ending()
+        parse_results = parser_element.parseString(word_ending)
+        self.assertEqual(word_ending, parse_results["word_ending"])
+        return
+
+    @hypothesis.given(strategies.links.page_name(1, 16))
     def test_internal_link_00(self, page_name):
         """Test internal link parser element.
 
