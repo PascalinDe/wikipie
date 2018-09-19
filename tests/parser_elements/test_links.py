@@ -95,7 +95,7 @@ class TestLinks(unittest.TestCase):
 
     @hypothesis.given(strategies.links.page_name(1, 16))
     def test_internal_link_00(self, page_name):
-        """Test internal link parser element.
+        """Test internal_link parser element.
 
         :param str page_name: page_name
 
@@ -108,4 +108,133 @@ class TestLinks(unittest.TestCase):
         self.assertEqual(
             page_name, parse_results["page_name"]
         )
+        return
+
+    @hypothesis.given(strategies.links.page_name(1, 16))
+    def test_internal_link_01(self, page_name):
+        """Test internal_link parser element.
+
+        :param str page_name: page_name
+
+        internal_link = "[[", ":", page_name, "]]";
+        """
+        internal_link = strategies.links.internal_link(
+            page_name, namespace_prefix=":"
+        )
+        namespaces = self._get_namespaces()
+        parser_element = links.get_internal_link(namespaces)
+        parse_results = parser_element.parseString(internal_link)
+        self.assertNotIn("namespace", parse_results)
+        self.assertEqual(
+            page_name, parse_results["page_name"]
+        )
+        return
+
+    @hypothesis.given(
+        strategies.links.namespace(),
+        strategies.links.page_name(1, 16)
+    )
+    def test_internal_link_02(self, namespace, page_name):
+        """Test internal_link parser element.
+
+        :param str namespace: namespace
+        :param str page_name: page_name
+
+        internal_link = "[[", namespace, ":", page_name, "]]";
+        """
+        namespace_prefix = ":" + namespace
+        internal_link = strategies.links.internal_link(
+            page_name, namespace_prefix=namespace_prefix
+        )
+        namespaces = self._get_namespaces()
+        parser_element = links.get_internal_link(namespaces)
+        parse_results = parser_element.parseString(internal_link)
+        self.assertEqual(namespace, parse_results["namespace"])
+        self.assertEqual(page_name, parse_results["page_name"])
+        return
+
+    @hypothesis.given(
+        strategies.links.namespace(),
+        strategies.links.page_name(1, 16)
+    )
+    def test_internal_link_03(self, namespace, page_name):
+        """Test internal_link parser element.
+
+        :param str namespace: namespace
+        :param str page_name: page_name
+
+        internal_link = "[[", namespace, ":", page_name, "|", "]]";
+        """
+        namespace_prefix = ":" + namespace
+        piped = "|"
+        internal_link = strategies.links.internal_link(
+            page_name, namespace_prefix=namespace_prefix, piped=piped
+        )
+        namespaces = self._get_namespaces()
+        parser_element = links.get_internal_link(namespaces)
+        parse_results = parser_element.parseString(internal_link)
+        self.assertEqual(namespace, parse_results["namespace"])
+        self.assertEqual(page_name, parse_results["page_name"])
+        self.assertNotIn("anchor", parse_results)
+        return
+
+    @hypothesis.given(
+        strategies.links.namespace(),
+        strategies.links.page_name(1, 16),
+        strategies.links.anchor(1, 16)
+    )
+    def test_internal_link_04(self, namespace, page_name, anchor):
+        """Test internal_link parser element.
+
+        :param str namespace: namespace
+        :param str page_name: page_name
+        :param str anchor: anchor
+
+        internal_link = "[[", namespace, ":", page_name, "|", anchor, "]]";
+        """
+        namespace_prefix = ":" + namespace
+        piped = "|" + anchor
+        internal_link = strategies.links.internal_link(
+            page_name, namespace_prefix=namespace_prefix, piped=piped
+        )
+        namespaces = self._get_namespaces()
+        parser_element = links.get_internal_link(namespaces)
+        parse_results = parser_element.parseString(internal_link)
+        self.assertEqual(namespace, parse_results["namespace"])
+        self.assertEqual(page_name, parse_results["page_name"])
+        self.assertEqual(anchor, parse_results["anchor"])
+        return
+
+    @hypothesis.given(
+        strategies.links.namespace(),
+        strategies.links.page_name(1, 16),
+        strategies.links.anchor(1, 16),
+        strategies.links.word_ending(1, 16)
+    )
+    def test_internal_link_05(self, namespace, page_name, anchor, word_ending):
+        """Test internal_link parser element.
+
+        :param str namespace: namespace
+        :param str page_name: page_name
+        :param str anchor: anchor
+        :param str word_ending: word_ending
+
+        internal_link = "[[", namespace, ":", page_name, "|", anchor, "]]",
+        word_ending;
+        """
+        namespace_prefix = ":" + namespace
+        piped = "|" + anchor
+        internal_link = strategies.links.internal_link(
+            page_name,
+            namespace_prefix=namespace_prefix,
+            piped=piped,
+            word_ending=word_ending
+        )
+        namespaces = self._get_namespaces()
+        parser_element = links.get_internal_link(namespaces)
+        parse_results = parser_element.parseString(internal_link)
+        self.assertEqual(namespace, parse_results["namespace"])
+        self.assertEqual(page_name, parse_results["page_name"])
+        self.assertEqual(anchor, parse_results["anchor"])
+        self.assertEqual(word_ending, parse_results["word_ending"])
         return
