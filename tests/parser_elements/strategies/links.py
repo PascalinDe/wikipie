@@ -76,28 +76,28 @@ def page_name(draw, min_size, max_size):
 
 
 @hypothesis.strategies.composite
-def anchor(draw, min_size, max_size):
-    """Return anchor.
+def link_text(draw, min_size, max_size):
+    """Return link_text.
 
     :param int min_size: minimum size
     :param int max_size: maximum size
 
-    anchor = { printable w/o "#<>[]_{|}" }-;
+    link_text = { printable w/o "#<>[]_{|}" }-;
 
-    :returns: anchor
+    :returns: link_text
     :rtype: str
     """
     bodyChars = "".join(
         char for char in string.printable if char not in "#<>[]_{|}"
     )
-    anchor_ = draw(
+    link_text_ = draw(
         hypothesis.strategies.text(
             alphabet=bodyChars,
             min_size=min_size,
             max_size=max_size
         )
     )
-    return anchor_
+    return link_text_
 
 
 @hypothesis.strategies.composite
@@ -131,7 +131,7 @@ def internal_link(page_name, namespace_prefix="", piped="", word_ending=""):
     :param str word_ending: word_ending
 
     namespace_prefix = [ namespace ], ":";
-    piped = "|", [ anchor ];
+    piped = "|", [ link_text ];
 
     internal_link = "[[", [ namespace_prefix ], page_name, [ piped ], "]]",
     [ word_ending ];

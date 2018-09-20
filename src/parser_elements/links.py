@@ -92,31 +92,31 @@ def _get_page_name(flag=False):
     return page_name
 
 
-def _get_anchor(flag=False):
-    """Get anchor parser element.
+def _get_link_text(flag=False):
+    """Get link_text parser element.
 
     :param bool flag: toggle debug messages on/off
 
-    anchor = { printable w/o "#<>[]_{|}" }-;
+    link_text = { printable w/o "#<>[]_{|}" }-;
 
-    :returns: anchor parser element
+    :returns: link_text parser element
     :rtype: ParserElement
     """
     try:
         initChars = "".join(
             char for char in string.printable if char not in "#<>[]_{|}"
         )
-        anchor = pyparsing.Word(initChars)
-        anchor.leaveWhitespace()
-        anchor.parseWithTabs()
+        link_text = pyparsing.Word(initChars)
+        link_text.leaveWhitespace()
+        link_text.parseWithTabs()
         if flag:
-            anchor.setDebug()
-        anchor.setName("anchor")
-        anchor = anchor.setResultsName("anchor")
+            link_text.setDebug()
+        link_text.setName("link_text")
+        link_text = link_text.setResultsName("link_text")
     except Exception as exception:
-        msg = "failed to get anchor parser element:{}".format(exception)
+        msg = "failed to get link_text parser element:{}".format(exception)
         raise RuntimeError(msg)
-    return anchor
+    return link_text
 
 
 def _get_word_ending(flag=False):
@@ -147,7 +147,7 @@ def get_internal_link(namespaces, flag=False):
     """Get internal link parser element.
 
     internal_link =
-    "[[", [ [ namespace ], ":" ], page_name, [ "|", [ anchor ] ], "]]",
+    "[[", [ [ namespace ], ":" ], page_name, [ "|", [ link_text ] ], "]]",
     word_ending;
 
     :param list namespaces: namespaces
@@ -162,14 +162,14 @@ def get_internal_link(namespaces, flag=False):
         colon = pyparsing.Literal(":")
         page_name = _get_page_name(flag=flag)
         pipe = pyparsing.Literal("|")
-        anchor = _get_anchor(flag=flag)
+        link_text = _get_link_text(flag=flag)
         internal_link_closing = pyparsing.Literal("]]")
         word_ending = _get_word_ending(flag=flag)
         internal_link = pyparsing.Combine(
             internal_link_opening
             + pyparsing.Optional(pyparsing.Optional(namespace) + colon)
             + page_name
-            + pyparsing.Optional(pipe + pyparsing.Optional(anchor))
+            + pyparsing.Optional(pipe + pyparsing.Optional(link_text))
             + internal_link_closing
             + pyparsing.Optional(word_ending)
         )
