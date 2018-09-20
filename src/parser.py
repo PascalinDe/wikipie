@@ -160,16 +160,16 @@ class Parser(object):
             internal_links = []
             for token in tokens:
                 if "namespace" in token:
-                    namespace = token["namespace"]
+                    namespace = token["internal_link"]["namespace"]
                 else:
                     namespace = self.namespaces["0"]
-                page_name = token["page_name"]
+                page_name = token["internal_link"]["page_name"]
                 if "link_text" in token:
-                    link_text = token["link_text"]
+                    link_text = token["internal_link"]["link_text"]
                 else:
                     link_text = page_name
                 if "word_ending" in token:
-                    link_text += token["word_ending"]
+                    link_text += token["internal_link"]["word_ending"]
                 internal_links.append(
                     src.page_elements.InternalLink(
                         namespace, page_name, link_text
