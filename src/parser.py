@@ -164,15 +164,15 @@ class Parser(object):
                 else:
                     namespace = self.namespaces["0"]
                 page_name = token["page_name"]
-                if "anchor" in token:
-                    anchor = token["anchor"]
+                if "link_text" in token:
+                    link_text = token["link_text"]
                 else:
-                    anchor = page_name
+                    link_text = page_name
                 if "word_ending" in token:
-                    anchor += token["word_ending"]
+                    link_text += token["word_ending"]
                 internal_links.append(
                     src.page_elements.InternalLink(
-                        namespace, page_name, anchor
+                        namespace, page_name, link_text
                     )
                 )
         except Exception as exception:
