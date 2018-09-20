@@ -106,7 +106,7 @@ class TestLinks(unittest.TestCase):
         parser_element = links.get_internal_link(namespaces)
         parse_results = parser_element.parseString(internal_link)
         self.assertEqual(
-            page_name, parse_results["page_name"]
+            page_name, parse_results["internal_link"]["page_name"]
         )
         return
 
@@ -126,7 +126,7 @@ class TestLinks(unittest.TestCase):
         parse_results = parser_element.parseString(internal_link)
         self.assertNotIn("namespace", parse_results)
         self.assertEqual(
-            page_name, parse_results["page_name"]
+            page_name, parse_results["internal_link"]["page_name"]
         )
         return
 
@@ -142,15 +142,19 @@ class TestLinks(unittest.TestCase):
 
         internal_link = "[[", namespace, ":", page_name, "]]";
         """
-        namespace_prefix = ":" + namespace
+        namespace_prefix = namespace + ":"
         internal_link = strategies.links.internal_link(
             page_name, namespace_prefix=namespace_prefix
         )
         namespaces = self._get_namespaces()
         parser_element = links.get_internal_link(namespaces)
         parse_results = parser_element.parseString(internal_link)
-        self.assertEqual(namespace, parse_results["namespace"])
-        self.assertEqual(page_name, parse_results["page_name"])
+        self.assertEqual(
+            namespace, parse_results["internal_link"]["namespace"]
+        )
+        self.assertEqual(
+            page_name, parse_results["internal_link"]["page_name"]
+        )
         return
 
     @hypothesis.given(
@@ -165,7 +169,7 @@ class TestLinks(unittest.TestCase):
 
         internal_link = "[[", namespace, ":", page_name, "|", "]]";
         """
-        namespace_prefix = ":" + namespace
+        namespace_prefix = namespace + ":"
         piped = "|"
         internal_link = strategies.links.internal_link(
             page_name, namespace_prefix=namespace_prefix, piped=piped
@@ -173,9 +177,13 @@ class TestLinks(unittest.TestCase):
         namespaces = self._get_namespaces()
         parser_element = links.get_internal_link(namespaces)
         parse_results = parser_element.parseString(internal_link)
-        self.assertEqual(namespace, parse_results["namespace"])
-        self.assertEqual(page_name, parse_results["page_name"])
-        self.assertNotIn("anchor", parse_results)
+        self.assertEqual(
+            namespace, parse_results["internal_link"]["namespace"]
+        )
+        self.assertEqual(
+            page_name, parse_results["internal_link"]["page_name"]
+        )
+        self.assertNotIn("anchor", parse_results["internal_link"])
         return
 
     @hypothesis.given(
@@ -192,7 +200,7 @@ class TestLinks(unittest.TestCase):
 
         internal_link = "[[", namespace, ":", page_name, "|", anchor, "]]";
         """
-        namespace_prefix = ":" + namespace
+        namespace_prefix = namespace + ":"
         piped = "|" + anchor
         internal_link = strategies.links.internal_link(
             page_name, namespace_prefix=namespace_prefix, piped=piped
@@ -200,9 +208,15 @@ class TestLinks(unittest.TestCase):
         namespaces = self._get_namespaces()
         parser_element = links.get_internal_link(namespaces)
         parse_results = parser_element.parseString(internal_link)
-        self.assertEqual(namespace, parse_results["namespace"])
-        self.assertEqual(page_name, parse_results["page_name"])
-        self.assertEqual(anchor, parse_results["anchor"])
+        self.assertEqual(
+            namespace, parse_results["internal_link"]["namespace"]
+        )
+        self.assertEqual(
+            page_name, parse_results["internal_link"]["page_name"]
+        )
+        self.assertEqual(
+            anchor, parse_results["internal_link"]["anchor"]
+        )
         return
 
     @hypothesis.given(
@@ -222,7 +236,7 @@ class TestLinks(unittest.TestCase):
         internal_link = "[[", namespace, ":", page_name, "|", anchor, "]]",
         word_ending;
         """
-        namespace_prefix = ":" + namespace
+        namespace_prefix = namespace + ":"
         piped = "|" + anchor
         internal_link = strategies.links.internal_link(
             page_name,
@@ -233,8 +247,33 @@ class TestLinks(unittest.TestCase):
         namespaces = self._get_namespaces()
         parser_element = links.get_internal_link(namespaces)
         parse_results = parser_element.parseString(internal_link)
-        self.assertEqual(namespace, parse_results["namespace"])
-        self.assertEqual(page_name, parse_results["page_name"])
-        self.assertEqual(anchor, parse_results["anchor"])
-        self.assertEqual(word_ending, parse_results["word_ending"])
+        self.assertEqual(
+            namespace, parse_results["internal_link"]["namespace"]
+        )
+        self.assertEqual(
+            page_name, parse_results["internal_link"]["page_name"]
+        )
+        self.assertEqual(
+            anchor, parse_results["internal_link"]["anchor"]
+        )
+        self.assertEqual(
+            word_ending, parse_results["internal_link"]["word_ending"]
+        )
+        return
+
+    @hypothesis.given(
+        hypothesis.strategies.data(),
+        strategies.links.page_name(1, 16)
+    )
+    def test_redirect_00(self, data, page_name):
+        """Test redirect parser element.
+
+        :param str page_name: page_name
+        """
+        internal_link = strategies.links.internal_link(page_name)
+        redirect = data.draw(strategies.links.redirect(internal_link))
+        namespaces = self._get_namespaces()
+        parser_element = links.get_redirect(namespaces)
+        parse_results = parser_element.parseString(redirect)
+        self.assertEqual(internal_link, parse_results["internal_link"][0])
         return

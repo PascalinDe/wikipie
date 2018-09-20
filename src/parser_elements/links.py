@@ -167,7 +167,7 @@ def get_internal_link(namespaces, flag=False):
         word_ending = _get_word_ending(flag=flag)
         internal_link = pyparsing.Combine(
             internal_link_opening
-            + pyparsing.Optional(colon + pyparsing.Optional(namespace))
+            + pyparsing.Optional(pyparsing.Optional(namespace) + colon)
             + page_name
             + pyparsing.Optional(pipe + pyparsing.Optional(anchor))
             + internal_link_closing
@@ -178,7 +178,7 @@ def get_internal_link(namespaces, flag=False):
         if flag:
             internal_link.setDebug()
         internal_link.setName("internal_link")
-        internal_link.setResultsName("internal_link")
+        internal_link = internal_link.setResultsName("internal_link")
     except Exception as exception:
         msg = "failed to return internal link:{}".format(exception)
         raise RuntimeError(msg)
