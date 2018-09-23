@@ -37,12 +37,14 @@ def heading_text(draw, min_size, max_size):
     :param int min_size: minimum size
     :param int max_size: maximum size
 
-    heading_text = { printable w/o "=" }-;
+    heading_text = { printable w/o "#<=>[]_{|}" }-;
 
     :returns: heading_text
     :rtype: str
     """
-    alphabet = "".join(char for char in string.printable if char not in "=")
+    alphabet = "".join(
+        char for char in string.printable if char not in "#<=>[]_{|}"
+    )
     heading_text_ = draw(
         hypothesis.strategies.text(
             alphabet=alphabet, min_size=min_size, max_size=max_size
