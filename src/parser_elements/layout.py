@@ -37,14 +37,14 @@ def get_heading_text(flag=False):
 
     :param bool flag: toggle debug messages on/off
 
-    heading_text = { printable w/o "=" }-;
+    heading_text = { printable w/o "#<=>[]_{|}" }-;
 
     :returns: heading_text
     :rtype: ParserElement
     """
     try:
         initChars = "".join(
-            char for char in string.printable if char not in "="
+            char for char in string.printable if char not in "#<=>[]_{|}"
         )
         heading_text = pyparsing.Word(initChars)
         heading_text.leaveWhitespace()
