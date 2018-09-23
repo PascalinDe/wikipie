@@ -27,6 +27,7 @@ import string
 import pyparsing
 
 # library specific imports
+from src.parser_elements import layout
 
 
 #: https://www.mediawiki.org/wiki/Help:Interwiki_linking
@@ -90,6 +91,35 @@ def _get_page_name(flag=False):
         msg = "failed to get page_name parser element:{}".format(exception)
         raise RuntimeError(msg)
     return page_name
+
+
+def _get_anchor(flag=False):
+    """Get anchor parser element.
+
+    :param bool flag: toggle debug messages on/off
+
+    anchor = "#", heading_text | "top";
+
+    :returns: anchor
+    :rtype: ParserElement
+    """
+    try:
+        heading_text = layout.get_heading_text(flag=flag)
+        top = pyparsing.Literal("top")
+        anchor = pyparsing.Combine(
+            pyparsing.Literal("#")
+            + pyparsing.Or(heading_text, top)
+        )
+        anchor.leaveWhitespace()
+        anchor.parseWithTabs()
+        if flag:
+            anchor.setDebug()
+        anchor.setName("anchor")
+        anchor = anchor.setResultsName("anchor")
+    except Exception as exception:
+        msg = "failed to get anchor parser element:{}".format(exception)
+        raise RuntimeError(msg)
+    return anchor
 
 
 def _get_link_text(flag=False):
