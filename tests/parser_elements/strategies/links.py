@@ -75,6 +75,21 @@ def page_name(draw, min_size, max_size):
     return page_name_
 
 
+def anchor(heading_text=""):
+    """Return anchor.
+
+    anchor = "#", heading_text | "top";
+
+    :returns: anchor
+    :rtype: str
+    """
+    if heading_text:
+        anchor_ = "#" + heading_text
+    else:
+        anchor_ = "#" + "top"
+    return anchor_
+
+
 @hypothesis.strategies.composite
 def link_text(draw, min_size, max_size):
     """Return link_text.

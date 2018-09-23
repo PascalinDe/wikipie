@@ -71,6 +71,31 @@ class TestLinks(unittest.TestCase):
         self.assertEqual(page_name, parse_results["page_name"])
         return
 
+    @hypothesis.given(strategies.layout.heading_text(1, 16))
+    def test_anchor_00(self, heading_text):
+        """Test anchor parser element.
+
+        :param str heading_text: heading_text
+
+        anchor = "#", heading_text;
+        """
+        anchor = strategies.links.anchor(heading_text=heading_text)
+        parser_element = links._get_anchor()
+        parse_results = parser_element.parseString(anchor)
+        self.assertEqual(heading_text, parse_results["anchor"]["heading_text"])
+        return
+
+    def test_anchor_01(self):
+        """Test anchor parser element.
+
+        anchor = "#", "top";
+        """
+        anchor = strategies.links.anchor()
+        parser_element = links._get_anchor()
+        parse_results = parser_element.parseString(anchor)
+        self.assertEqual("top", parse_results["anchor"]["heading_text"])
+        return
+
     @hypothesis.given(strategies.links.link_text(1, 16))
     def test_link_text_00(self, link_text):
         """Test link_text parser element.
