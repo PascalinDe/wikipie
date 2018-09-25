@@ -108,7 +108,7 @@ def _get_anchor(flag=False):
         top = pyparsing.Literal("top")
         anchor = pyparsing.Combine(
             pyparsing.Literal("#")
-            + pyparsing.Or(heading_text, top)
+            + pyparsing.Or((heading_text, top))
         )
         anchor.leaveWhitespace()
         anchor.parseWithTabs()
@@ -177,8 +177,8 @@ def get_internal_link(namespaces, flag=False):
     """Get internal link parser element.
 
     internal_link =
-    "[[", [ [ namespace ], ":" ], page_name, [ "|", [ link_text ] ], "]]",
-    word_ending;
+    "[[", [ [ namespace ], ":" ], ( anchor | page_name, [ anchor ] ),
+    [ "|", [ link_text ] ], "]]", [ word_ending ];
 
     :param list namespaces: namespaces
     :param bool flag: toggle debug messages on/off
@@ -191,6 +191,7 @@ def get_internal_link(namespaces, flag=False):
         namespace = _get_namespace(namespaces, flag=flag)
         colon = pyparsing.Literal(":")
         page_name = _get_page_name(flag=flag)
+        anchor = _get_anchor(flag=flag)
         pipe = pyparsing.Literal("|")
         link_text = _get_link_text(flag=flag)
         internal_link_closing = pyparsing.Literal("]]")
@@ -198,7 +199,12 @@ def get_internal_link(namespaces, flag=False):
         internal_link = pyparsing.Combine(
             internal_link_opening
             + pyparsing.Optional(pyparsing.Optional(namespace) + colon)
-            + page_name
+            + pyparsing.Or(
+                (
+                    anchor,
+                    pyparsing.Combine(page_name + pyparsing.Optional(anchor))
+                )
+            )
             + pyparsing.Optional(pipe + pyparsing.Optional(link_text))
             + internal_link_closing
             + pyparsing.Optional(word_ending)

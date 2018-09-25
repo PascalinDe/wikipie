@@ -289,6 +289,58 @@ class TestLinks(unittest.TestCase):
         return
 
     @hypothesis.given(
+        strategies.layout.heading_text(1, 16),
+        strategies.links.link_text(1, 16),
+        strategies.links.word_ending(1, 16)
+    )
+    def test_internal_link_06(self, heading_text, link_text, word_ending):
+        """Test internal_link parser element.
+
+        :param str heading_text: heading_text
+        :param str link_text: link_text
+        :param str word_ending: word_ending
+
+        internal_link = "[[", anchor, "|", link_text, "]]", word_ending;
+        """
+        anchor = strategies.links.anchor(heading_text=heading_text)
+        piped = "|" + link_text
+        internal_link = strategies.links.internal_link(
+            anchor,
+            piped=piped,
+            word_ending=word_ending
+        )
+        namespaces = self._get_namespaces()
+        parser_element = links.get_internal_link(namespaces)
+        parse_results = parser_element.parseString(internal_link)
+        self.assertEqual(
+            heading_text,
+            parse_results["internal_link"]["anchor"]["heading_text"]
+        )
+        self.assertEqual(
+            link_text, parse_results["internal_link"]["link_text"]
+        )
+        self.assertEqual(
+            word_ending, parse_results["internal_link"]["word_ending"]
+        )
+        return
+
+    @hypothesis.given(
+        strategies.links.namespace(),
+        strategies.links.page_name(1, 16),
+        strategies.layout.heading_text(1, 16)
+    )
+    def test_internal_link_07(self, namespace, page_name, heading_text):
+        """Test internal_link parser element.
+
+        :param str namespace: namespace
+        :param str page_name: page_name
+        :param str heading_text: heading_text
+
+        internal_link = "[[", namespace, ":", page_name, anchor, "]]";
+        """
+        pass
+
+    @hypothesis.given(
         hypothesis.strategies.data(),
         strategies.links.page_name(1, 16)
     )

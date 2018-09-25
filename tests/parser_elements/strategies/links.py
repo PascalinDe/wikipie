@@ -140,7 +140,7 @@ def word_ending(draw, min_size, max_size):
 def internal_link(page_name, namespace_prefix="", piped="", word_ending=""):
     """Return internal_link.
 
-    :param str page_name: page_name
+    :param str page_name: page_name (contains anchor if so)
     :param str namespace_prefix: namespace prefix
     :param str piped: piped
     :param str word_ending: word_ending
@@ -148,8 +148,9 @@ def internal_link(page_name, namespace_prefix="", piped="", word_ending=""):
     namespace_prefix = [ namespace ], ":";
     piped = "|", [ link_text ];
 
-    internal_link = "[[", [ namespace_prefix ], page_name, [ piped ], "]]",
-    [ word_ending ];
+    internal_link =
+    "[[", [ namespace_prefix ], ( anchor | page_name, [ anchor ] ),
+    [ piped ], "]]", [ word_ending ];
 
     :returns: internal_link
     :rtype: str
