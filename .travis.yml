@@ -1,0 +1,13 @@
+language: python
+python:
+        - "3.5"
+        - "3.6"
+
+install:
+        - pip install pyparsing pytest flake8 pylint hypothesis
+
+script:
+        - pytest
+
+stages:
+        - test
