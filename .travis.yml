@@ -4,14 +4,14 @@ python:
         - "3.6"
 
 install:
-        - pip install pyparsing pytest flake8 pylint3 hypothesis
+        - pip install pyparsing pytest flake8 pylint hypothesis
 
 script: pytest tests
 
 jobs:
         include:
                 - stage: code style
-                  script: pylint3 --extension-pkg-whitelist=lxml src
+                  script: pylint --extension-pkg-whitelist=lxml src
 stages:
         - test
         - code style
