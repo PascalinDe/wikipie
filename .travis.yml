@@ -6,11 +6,10 @@ python:
 install:
         - pip install pyparsing pytest flake8 pylint hypothesis
 
+script: pytest tests
+
 jobs:
         include:
-                - script: pytest tests
-                - script: pytest tests
-                  python: "3.6"
                 - stage: code style
                   script: pylint src
 stages:
