@@ -1,3 +1,3 @@
 # wikipie
 Wikitext parser.
-[![Build Status](https://www.travis-ci.org/PascalinDe/wikipie)]
+[![Build Status](https://api.travis-ci.org/PascalinDe/wikipie.svg?branch=dev)]
