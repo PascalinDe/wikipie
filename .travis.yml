@@ -8,7 +8,9 @@ install:
 
 jobs:
         include:
-                - script: pytest
+                - script: pytest tests
+                - script: pytest tests
+                  python: "3.6"
                 - stage: code style
                   script: pylint src
 stages:
