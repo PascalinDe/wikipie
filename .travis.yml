@@ -4,7 +4,7 @@ python:
         - "3.6"
 
 install:
-        - pip install pyparsing pytest flake8 pylint hypothesis
+        - pip install pyparsing pytest flake8 pylint3 hypothesis
 
 script: pytest tests
 
