@@ -72,14 +72,14 @@ def _get_page_name(flag=False):
     :rtype: ParserElement
     """
     try:
-        initChars = "".join(
+        init_chars = "".join(
             char for char in string.printable if char not in "#:<>[]_{|}"
         )
-        bodyChars = "".join(
+        body_chars = "".join(
             char for char in string.printable if char not in "#<>[]_{|}"
         )
         page_name = pyparsing.Word(
-            initChars, bodyChars=bodyChars
+            init_chars, bodyChars=body_chars
         )
         page_name.leaveWhitespace()
         page_name.parseWithTabs()
@@ -133,10 +133,10 @@ def _get_link_text(flag=False):
     :rtype: ParserElement
     """
     try:
-        initChars = "".join(
+        init_chars = "".join(
             char for char in string.printable if char not in "#<>[]_{|}"
         )
-        link_text = pyparsing.Word(initChars)
+        link_text = pyparsing.Word(init_chars)
         link_text.leaveWhitespace()
         link_text.parseWithTabs()
         if flag:
