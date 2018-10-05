@@ -29,7 +29,7 @@ import lxml.etree
 # library specific imports
 
 
-class ExportFileParser(object):
+class ExportFileParser():
     """Wikipedia export file parser.
 
     (q.v. https://stackoverflow.com/questions/31250641/
@@ -55,7 +55,6 @@ class ExportFileParser(object):
         except Exception as exception:
             msg = "failed to initialize export file parser\t: {}"
             raise RuntimeError(msg.format(exception))
-        return
 
     @staticmethod
     def _validate(xsd, tree):
@@ -73,7 +72,6 @@ class ExportFileParser(object):
         except Exception as exception:
             msg = "failed to validate Wikipedia export file\t:{}"
             raise RuntimeError(msg.format(exception))
-        return
 
     def find_language_attrib(self):
         """Find language attribute.
