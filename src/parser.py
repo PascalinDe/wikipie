@@ -161,7 +161,16 @@ class Parser():
                     namespace = indexes[token["internal_link"]["namespace"]]
                 else:
                     namespace = indexes["(Main)"]
-                page_name = token["internal_link"]["page_name"]
+                if "anchor" in token["internal_link"]:
+                    if "page_name" in token["internal_link"]:
+                        page_name = (
+                            token["internal_link"]["page_name"]
+                            + token["internal_link"]["anchor"][0]
+                        )
+                    else:
+                        page_name = token["internal_link"]["anchor"][0]
+                else:
+                    page_name = token["internal_link"]["page_name"]
                 if "link_text" in token:
                     link_text = token["internal_link"]["link_text"]
                 else:
