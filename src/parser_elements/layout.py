@@ -46,13 +46,7 @@ def get_heading_text(flag=False):
         init_chars = "".join(
             char for char in string.printable if char not in "#<=>[]_{|}"
         )
-        heading_text = pyparsing.Word(initChars)
-=======
-        init_chars = "".join(
-            char for char in string.printable if char not in "#<=>[]_{|}"
-        )
         heading_text = pyparsing.Word(init_chars)
->>>>>>> dev
         heading_text.leaveWhitespace()
         heading_text.parseWithTabs()
         if flag:

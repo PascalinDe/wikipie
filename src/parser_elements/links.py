@@ -133,17 +133,10 @@ def _get_link_text(flag=False):
     :rtype: ParserElement
     """
     try:
-<<<<<<< HEAD
-        initChars = "".join(
-            char for char in string.printable if char not in "#<>[]_{|}"
-        )
-        link_text = pyparsing.Word(initChars)
-=======
         init_chars = "".join(
             char for char in string.printable if char not in "#<>[]_{|}"
         )
         link_text = pyparsing.Word(init_chars)
->>>>>>> dev
         link_text.leaveWhitespace()
         link_text.parseWithTabs()
         if flag:
