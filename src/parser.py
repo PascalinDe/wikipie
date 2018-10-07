@@ -30,7 +30,7 @@ import src.page_elements
 import src.parser_elements.links
 
 
-class Parser(object):
+class Parser():
     """Wikitext parser.
 
     :ivar dict namespaces: namespaces
@@ -49,7 +49,6 @@ class Parser(object):
         except Exception as exception:
             msg = "failed to initialize wikitext parser\t: {}"
             raise RuntimeError(msg.format(exception))
-        return
 
     @staticmethod
     def find_sections(wikitext, level=2):
