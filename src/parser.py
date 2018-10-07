@@ -22,10 +22,8 @@
 
 # standard library imports
 import re
-import collections
 
 # third party imports
-import pyparsing
 
 # library specific imports
 import src.page_elements
@@ -75,7 +73,7 @@ class Parser(object):
                 match[0] if match[0] else match[1]
                 for match in pattern.findall(wikitext)
             ]
-            if not matches:
+            if not matches:     # pylint: disable=no-else-return
                 return src.page_elements.Section(level-1, "", wikitext, [])
             else:
                 format_string = (
@@ -93,7 +91,7 @@ class Parser(object):
                     "number of sections ({})"
                 ).format(len(matches), len(splits)-1)
                 assert len(matches) == len(splits)-1, msg
-                if level == 6:
+                if level == 6:  # pylint: disable=no-else-return
                     subsections = [
                         src.page_elements.Section(level, heading, wikitext, [])
                         for heading, wikitext in zip(matches, splits[1:])
