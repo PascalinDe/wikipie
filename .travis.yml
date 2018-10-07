@@ -15,4 +15,3 @@ jobs:
 stages:
         - test
         - name: code style
-          if: branch = dev
