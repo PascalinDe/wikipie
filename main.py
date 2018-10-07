@@ -78,6 +78,8 @@ def main():
                 print(section)
                 internal_links = page.find_internal_links(section.wikitext)
                 print(internal_links)
+                rows = page.create_pagelinks_table_rows(section.wikitext)
+                print(rows)
         time1 = time.time()
         logger.info("parsed wikitext (%f sec)", time1 - time0)
     except Exception as exception:
