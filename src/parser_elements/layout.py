@@ -43,10 +43,10 @@ def get_heading_text(flag=False):
     :rtype: ParserElement
     """
     try:
-        initChars = "".join(
+        init_chars = "".join(
             char for char in string.printable if char not in "#<=>[]_{|}"
         )
-        heading_text = pyparsing.Word(initChars)
+        heading_text = pyparsing.Word(init_chars)
         heading_text.leaveWhitespace()
         heading_text.parseWithTabs()
         if flag:
