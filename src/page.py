@@ -28,7 +28,7 @@ import json
 # library specific imports
 
 
-class Page(object):
+class Page():
     """Wikipedia page.
 
     :ivar str title: title
@@ -60,7 +60,6 @@ class Page(object):
         except Exception as exception:
             msg = "failed to initialize root:{}".format(exception)
             raise RuntimeError(msg)
-        return
 
     @staticmethod
     def _search_depth_first(section):
