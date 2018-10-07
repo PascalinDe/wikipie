@@ -40,6 +40,7 @@ class Page(object):
     """
 
     def __init__(self, title, id_, ns, revision_id, wikitext, parser):
+        # pylint: disable=too-many-arguments
         """Initialize root.
 
         :param str title: title
@@ -52,7 +53,7 @@ class Page(object):
         try:
             self.title = title
             self.id_ = id_
-            self.ns = ns
+            self.ns = ns    # pylint: disable=invalid-name
             self.revision_id = revision_id
             self.wikitext = wikitext
             self.parser = parser
