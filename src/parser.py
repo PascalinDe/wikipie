@@ -22,17 +22,15 @@
 
 # standard library imports
 import re
-import collections
 
 # third party imports
-import pyparsing
 
 # library specific imports
 import src.page_elements
 import src.parser_elements.links
 
 
-class Parser(object):
+class Parser():
     """Wikitext parser.
 
     :ivar dict namespaces: namespaces
@@ -51,7 +49,6 @@ class Parser(object):
         except Exception as exception:
             msg = "failed to initialize wikitext parser\t: {}"
             raise RuntimeError(msg.format(exception))
-        return
 
     @staticmethod
     def find_sections(wikitext, level=2):
@@ -75,7 +72,7 @@ class Parser(object):
                 match[0] if match[0] else match[1]
                 for match in pattern.findall(wikitext)
             ]
-            if not matches:
+            if not matches:     # pylint: disable=no-else-return
                 return src.page_elements.Section(level-1, "", wikitext, [])
             else:
                 format_string = (
@@ -93,7 +90,7 @@ class Parser(object):
                     "number of sections ({})"
                 ).format(len(matches), len(splits)-1)
                 assert len(matches) == len(splits)-1, msg
-                if level == 6:
+                if level == 6:  # pylint: disable=no-else-return
                     subsections = [
                         src.page_elements.Section(level, heading, wikitext, [])
                         for heading, wikitext in zip(matches, splits[1:])

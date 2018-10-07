@@ -29,13 +29,15 @@ import lxml.etree
 # library specific imports
 
 
-class ExportFileParser(object):
+class ExportFileParser():
     """Wikipedia export file parser.
+
+    (q.v. https://stackoverflow.com/questions/31250641/
+    python-lxml-using-the-xmllang-attribute-to-retrieve-an-element)
 
     :cvar dict NSMAP: namespaces
     :ivar _ElementTree tree: tree
     """
-    #: https://stackoverflow.com/questions/31250641/python-lxml-using-the-xmllang-attribute-to-retrieve-an-element
     NSMAP = {"xml": "http://www.w3.org/XML/1998/namespace"}
 
     def __init__(self, xml, xsd):
@@ -48,18 +50,16 @@ class ExportFileParser(object):
             logger = logging.getLogger().getChild(__name__)
             logger.info("initializing Wikipedia export file parser")
             tree = lxml.etree.parse(xml)
-            self._validate(xml, xsd, tree)
+            self._validate(xsd, tree)
             self.tree = tree
         except Exception as exception:
             msg = "failed to initialize export file parser\t: {}"
             raise RuntimeError(msg.format(exception))
-        return
 
     @staticmethod
-    def _validate(xml, xsd, tree):
+    def _validate(xsd, tree):
         """Validate Wikipedia export file.
 
-        :param str xml: XML file
         :param str xsd: XSD
         :param _ElementTree tree: tree
         """
@@ -72,7 +72,6 @@ class ExportFileParser(object):
         except Exception as exception:
             msg = "failed to validate Wikipedia export file\t:{}"
             raise RuntimeError(msg.format(exception))
-        return
 
     def find_language_attrib(self):
         """Find language attribute.
@@ -161,28 +160,16 @@ class ExportFileParser(object):
         page_element = {}
         if "title" in prop:
             title_element = element.find("{*}title")
-            if title_element.text is not None:
-                page_element["title"] = title_element.text
-            else:
-                page_element["title"] = ""
+            page_element["title"] = title_element.text or ""
         if "ns" in prop:
             ns_element = element.find("{*}ns")
-            if ns_element.text is not None:
-                page_element["ns"] = ns_element.text
-            else:
-                page_element["ns"] = ""
+            page_element["ns"] = ns_element.text or ""
         if "id" in prop:
             pageid_element = element.find("{*}id")
-            if pageid_element.text is not None:
-                page_element["id"] = pageid_element.text
-            else:
-                page_element["id"] = ""
+            page_element["id"] = pageid_element.text or ""
         if "redirect" in prop:
             redirect_element = element.find("{*}redirect")
-            if redirect_element is not None:
-                page_element["redirect"] = redirect_element.attrib["title"]
-            else:
-                page_element["redirect"] = ""
+            page_element["redirect"] = redirect_element.text or ""
         if "revision" in prop:
             elements = element.iterfind("{*}revision")
             page_element["revision"] = list(
@@ -212,66 +199,42 @@ class ExportFileParser(object):
         try:
             revision_element = {}
             id_element = element.find("{*}id")
-            if id_element.text is not None:
-                revision_element["id"] = id_element.text
-            else:
-                revision_element["id"] = ""
+            revision_element["id"] = id_element.text or ""
             parentid_element = element.find("{*}parentid")
             if parentid_element is not None:
-                if parentid_element.text is not None:
-                    revision_element["parentid"] = parentid_element.text
-                else:
-                    revision_element["parentid"] = ""
+                revision_element["parentid"] = parentid_element.text or ""
             else:
                 revision_element["parentid"] = ""
             timestamp_element = element.find("{*}timestamp")
-            if timestamp_element.text is not None:
-                revision_element["timestamp"] = timestamp_element.text
-            else:
-                revision_element["timestamp"] = ""
-            contributor_element = element.find("{*}contributor")
+            revision_element["timestamp"] = timestamp_element.text or ""
             revision_element["contributor"] = self._find_contributor_element(
-                contributor_element
+                element.find("{*}contributor")
             )
             minor_element = element.find("{*}minor")
             if minor_element is not None:
-                if minor_element.text is not None:
-                    revision_element["minor"] = minor_element.text
-                else:
-                    revision_element["minor"] = ""
+                revision_element["minor"] = minor_element.text or ""
             else:
                 revision_element["minor"] = ""
             comment_element = element.find("{*}comment")
             if comment_element is not None:
-                if comment_element.text is not None:
-                    revision_element["comment"] = comment_element.text
-                else:
-                    revision_element["comment"] = ""
+                revision_element["comment"] = comment_element.text or ""
             else:
                 revision_element["comment"] = ""
             model_element = element.find("{*}model")
-            if model_element.text is not None:
-                revision_element["model"] = model_element.text
-            else:
-                revision_element["model"] = ""
+            revision_element["model"] = model_element.text or ""
             format_element = element.find("{*}format")
-            if format_element.text is not None:
-                revision_element["format"] = format_element.text
-            else:
-                revision_element["format"] = ""
+            revision_element["format"] = format_element.text or ""
             text_element = element.find("{*}text")
             revision_element["text"] = self._find_text_element(text_element)
             sha1_element = element.find("{*}sha1")
-            if sha1_element.text is not None:
-                revision_element["sha1"] = sha1_element.text
-            else:
-                revision_element["sha1"] = ""
+            revision_element["sha1"] = sha1_element.text or ""
         except Exception as exception:
             msg = "failed to find revision element\t: {}"
             raise RuntimeError(msg.format(exception))
         return revision_element
 
-    def _find_contributor_element(self, element):
+    @staticmethod
+    def _find_contributor_element(element):
         """Find contributor element.
 
         :param Element element: contributor element
@@ -283,26 +246,17 @@ class ExportFileParser(object):
             contributor_element = {}
             username_element = element.find("{*}username")
             if username_element is not None:
-                if username_element.text is not None:
-                    contributor_element["username"] = username_element.text
-                else:
-                    contributor_element["username"] = ""
+                contributor_element["username"] = username_element.text or ""
             else:
                 contributor_element["username"] = ""
             id_element = element.find("{*}id")
             if id_element is not None:
-                if id_element.text is not None:
-                    contributor_element["id"] = id_element.text
-                else:
-                    contributor_element["id"] = ""
+                contributor_element["id"] = id_element.text or ""
             else:
                 contributor_element["id"] = ""
             ip_element = element.find("{*}ip")
             if ip_element is not None:
-                if ip_element.text is not None:
-                    contributor_element["ip"] = ip_element.text
-                else:
-                    contributor_element["ip"] = ""
+                contributor_element["ip"] = ip_element.text or ""
             else:
                 contributor_element["ip"] = ""
             # attribute (optional)
@@ -315,7 +269,8 @@ class ExportFileParser(object):
             raise RuntimeError(msg.format(exception))
         return contributor_element
 
-    def _find_text_element(self, element):
+    @staticmethod
+    def _find_text_element(element):
         """Find text element.
 
         :param Element element: text element
