@@ -312,6 +312,10 @@ class TestLinks(unittest.TestCase):
         namespaces = self._get_namespaces()
         parser_element = links.get_internal_link(namespaces)
         parse_results = parser_element.parseString(internal_link)
+        self.assertNotIn(
+            "page_name",
+            parse_results["internal_link"]
+        )
         self.assertEqual(
             heading_text,
             parse_results["internal_link"]["anchor"]["heading_text"]
@@ -338,7 +342,26 @@ class TestLinks(unittest.TestCase):
 
         internal_link = "[[", namespace, ":", page_name, anchor, "]]";
         """
-        pass
+        namespace_prefix = namespace + ":"
+        anchor = strategies.links.anchor(heading_text=heading_text)
+        internal_link = strategies.links.internal_link(
+            page_name + anchor,
+            namespace_prefix=namespace_prefix
+        )
+        namespaces = self._get_namespaces()
+        parser_element = links.get_internal_link(namespaces)
+        parse_results = parser_element.parseString(internal_link)
+        self.assertEqual(
+            namespace, parse_results["internal_link"]["namespace"]
+        )
+        self.assertEqual(
+            page_name, parse_results["internal_link"]["page_name"]
+        )
+        self.assertEqual(
+            heading_text,
+            parse_results["internal_link"]["anchor"]["heading_text"]
+        )
+        return
 
     @hypothesis.given(
         hypothesis.strategies.data(),
