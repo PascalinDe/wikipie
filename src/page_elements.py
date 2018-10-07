@@ -30,15 +30,21 @@ import collections
 _Section = collections.namedtuple(
     "Section", ["level", "heading", "wikitext", "subsections"]
 )
-class Section(_Section):
+
+
+class Section(_Section):    # pylint: disable=missing-docstring
     __slots__ = ()
+
     def __repr__(self):
         return "{}\n{}".format(self.heading, self.wikitext)
 
 
 _Paragraph = collections.namedtuple("Paragraph", ["index", "wikitext"])
-class Paragraph(_Paragraph):
+
+
+class Paragraph(_Paragraph):    # pylint: disable=missing-docstring
     __slots__ = ()
+
     def __repr__(self):
         return " {}".format(self.wikitext)
 
@@ -46,8 +52,11 @@ class Paragraph(_Paragraph):
 _InternalLink = collections.namedtuple(
     "InternalLink", ["namespace", "page_name", "anchor"]
 )
-class InternalLink(_InternalLink):
+
+
+class InternalLink(_InternalLink):  # pylint: disable=missing-docstring
     __slots__ = ()
+
     def __repr__(self):
         return self.anchor
 
