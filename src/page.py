@@ -247,3 +247,22 @@ class Page():
             msg = "failed to create pagelinks table rows:{}".format(exception)
             raise RuntimeError(msg)
         return rows
+
+    def create_pagelinks_table(self):
+        """Create pagelinks table
+        (q.v. https://www.mediawiki.org/wiki/Special:MyLanguage/
+        Manual:Pagelinks_table).
+
+        :returns: pagelinks table
+        :rtype: list
+        """
+        try:
+            pagelinks_table = []
+            for section in self._search_depth_first(self.section):
+                pagelinks_table += self.create_pagelinks_table_rows(
+                    section.wikitext
+                )
+        except Exception as exception:
+            msg = "failed to create pagelinks table:{}".format(exception)
+            raise RuntimeError(msg)
+        return pagelinks_table
