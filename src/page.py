@@ -222,3 +222,28 @@ class Page():
             msg = "failed to find internal links:{}".format(exception)
             raise RuntimeError(msg)
         return internal_links
+
+    def create_pagelinks_table_rows(self, wikitext):
+        """Create pagelinks table rows
+        (q.v. https://www.mediawiki.org/wiki/Special:MyLanguage/
+        Manual:Pagelinks_table).
+
+        :param str wikitext: wikitext
+
+        :returns: pagelinks table rows
+        :rtype: list
+        """
+        try:
+            internal_links = self.find_internal_links(wikitext)
+            pl_from = self.id_
+            pl_from_namespace = self.ns
+            rows = []
+            for internal_link in internal_links:
+                pl_namespace = internal_link.namespace
+                pl_title = internal_link.page_name
+                row = (pl_from, pl_from_namespace, pl_namespace, pl_title)
+                rows.append(row)
+        except Exception as exception:
+            msg = "failed to create pagelinks table rows:{}".format(exception)
+            raise RuntimeError(msg)
+        return rows

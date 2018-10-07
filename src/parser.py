@@ -147,9 +147,10 @@ class Parser():
         :rtype: list
         """
         try:
-            namespaces = [v for k, v in self.namespaces.items() if k != "0"]
+            indexes = {v: k for k, v in self.namespaces.items()}
             parser_element = src.parser_elements.links.get_internal_link(
-                namespaces, flag=self.flag
+                [v for k, v in self.namespaces.items() if k != "0"],
+                flag=self.flag
             )
             tokens = [
                 tokens for tokens, _, _ in parser_element.scanString(wikitext)
@@ -157,9 +158,9 @@ class Parser():
             internal_links = []
             for token in tokens:
                 if "namespace" in token:
-                    namespace = token["internal_link"]["namespace"]
+                    namespace = indexes[token["internal_link"]["namespace"]]
                 else:
-                    namespace = self.namespaces["0"]
+                    namespace = indexes["(Main)"]
                 page_name = token["internal_link"]["page_name"]
                 if "link_text" in token:
                     link_text = token["internal_link"]["link_text"]
