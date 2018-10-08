@@ -16,12 +16,12 @@
 
 
 """
-:synopsis: Layout parser elements.
+:synopsis: Layout parser elements and regular expressions.
 """
 
 
 # standard library imports
-import string
+import re
 
 # third party imports
 import pyparsing
@@ -37,16 +37,13 @@ def get_heading_text(flag=False):
 
     :param bool flag: toggle debug messages on/off
 
-    heading_text = { printable w/o "#<=>[]_{|}" }-;
+    heading_text = { unicode_char w/o "#<=>[]_{|}" }-;
 
     :returns: heading_text
     :rtype: ParserElement
     """
     try:
-        init_chars = "".join(
-            char for char in string.printable if char not in "#<=>[]_{|}"
-        )
-        heading_text = pyparsing.Word(init_chars)
+        heading_text = pyparsing.Regex(r"[^#<=>\[\]_{|}]+")
         heading_text.leaveWhitespace()
         heading_text.parseWithTabs()
         if flag:
@@ -57,3 +54,34 @@ def get_heading_text(flag=False):
         msg = "failed to get heading_text parser element:{}".format(exception)
         raise RuntimeError(msg)
     return heading_text
+
+
+def get_section_regex(level=2, non_capturing=False):
+    """Get section regular expression.
+
+    :param int level: level
+    :param bool non_capturing: toggle non-capturing heading_text group on/off
+
+    :returns: section regular expression
+    :rtype: SRE_Pattern
+    """
+    try:
+        blacklist_characters = r"#<=>\[\]_{|}"
+        if non_capturing:
+            format_string = (
+                r"^(?:={{{0}}}(?:[^{1}].*?)={{{0}}})|"
+                r"(?:<h{0}>(?:[^{1}].*?)</h{0}>)$"
+            )
+        else:
+            format_string = (
+                r"^(?:={{{0}}}([^{1}].*?)={{{0}}})|"
+                r"(?:<h{0}>([^{1}].*?)</h{0}>)$"
+            )
+        pattern = re.compile(
+            format_string.format(level, blacklist_characters),
+            re.MULTILINE
+        )
+    except Exception as exception:
+        msg = "failed to get section regular expression:{}".format(exception)
+        raise RuntimeError(msg)
+    return pattern
