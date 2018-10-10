@@ -83,6 +83,6 @@ class TestLayout(unittest.TestCase):
             level=level, non_capturing=True
         )
         match = section_regex.match(section)
-        self.assertEqual(section, match[0])
+        self.assertEqual(section, match.group(0))
         self.assertRaises(IndexError, match.group, 1)
         return
