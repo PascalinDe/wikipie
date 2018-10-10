@@ -37,13 +37,13 @@ def get_heading_text(flag=False):
 
     :param bool flag: toggle debug messages on/off
 
-    heading_text = { unicode_char w/o "#<=>[]_{|}" }-;
+    heading_text = { unicode_char w/o "\n\r#<=>[]_{|}" }-;
 
     :returns: heading_text
     :rtype: ParserElement
     """
     try:
-        heading_text = pyparsing.Regex(r"[^#<=>\[\]_{|}]+")
+        heading_text = pyparsing.Regex(r"[^\n\r#<=>\[\]_{|}]+")
         heading_text.leaveWhitespace()
         heading_text.parseWithTabs()
         if flag:
@@ -56,30 +56,34 @@ def get_heading_text(flag=False):
     return heading_text
 
 
-def get_section_regex(level=2, non_capturing=False):
+def get_section_regex(level=2, non_capturing=False, flag=False):
     """Get section regular expression.
 
     :param int level: level
     :param bool non_capturing: toggle non-capturing heading_text group on/off
+    :param bool flag: toggle debug messages on/off
 
     :returns: section regular expression
     :rtype: SRE_Pattern
     """
     try:
-        blacklist_characters = r"#<=>\[\]_{|}"
+        blacklist_characters = r"\n\r#<=>\[\]_{|}"
         if non_capturing:
             format_string = (
-                r"^(?:={{{0}}}(?:[^{1}].*?)={{{0}}})|"
-                r"(?:<h{0}>(?:[^{1}].*?)</h{0}>)$"
+                r"^(?:={{{0}}}[^{1}].*?={{{0}}})|(?:<h{0}>[^{1}].*?</h{0}>)$"
             )
         else:
             format_string = (
                 r"^(?:={{{0}}}([^{1}].*?)={{{0}}})|"
                 r"(?:<h{0}>([^{1}].*?)</h{0}>)$"
             )
+        if flag:
+            flags = re.DEBUG | re.MULTILINE
+        else:
+            flags = re.MULTILINE
         pattern = re.compile(
             format_string.format(level, blacklist_characters),
-            re.MULTILINE
+            flags=flags
         )
     except Exception as exception:
         msg = "failed to get section regular expression:{}".format(exception)
