@@ -21,7 +21,6 @@
 
 
 # standard library imports
-import string
 
 # third party imports
 import hypothesis
@@ -37,17 +36,35 @@ def heading_text(draw, min_size, max_size):
     :param int min_size: minimum size
     :param int max_size: maximum size
 
-    heading_text = { printable w/o "#<=>[]_{|}" }-;
+    heading_text = { unicode_char w/o "\n\r#<=>[]_{|}" }-;
 
     :returns: heading_text
     :rtype: str
     """
-    alphabet = "".join(
-        char for char in string.printable if char not in "#<=>[]_{|}"
+    characters = hypothesis.strategies.characters(
+        blacklist_characters="\n\r#<=>[]_{|}"
     )
     heading_text_ = draw(
         hypothesis.strategies.text(
-            alphabet=alphabet, min_size=min_size, max_size=max_size
+            alphabet=characters, min_size=min_size, max_size=max_size
         )
     )
     return heading_text_
+
+
+@hypothesis.strategies.composite
+def section(draw, heading_text_, level):
+    """Return section.
+
+    :param str heading_text_: heading_text
+    :param int level: level
+
+    :returns: section
+    :rtype: str
+    """
+    elements = (
+        "{0}{1}{0}".format(level*"=", heading_text_),
+        "<h{0}>{1}</h{0}>".format(level, heading_text_)
+    )
+    section_ = draw(hypothesis.strategies.sampled_from(elements))
+    return section_
