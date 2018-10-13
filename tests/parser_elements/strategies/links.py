@@ -40,6 +40,7 @@ def namespace(draw):
     :returns: namespace
     :rtype: str
     """
+    # pylint: disable=invalid-name
     with open("tests/parser_elements/data/namespaces.csv") as fp:
         reader = csv.reader(fp)
         namespaces = next(reader)
@@ -54,24 +55,30 @@ def page_name(draw, min_size, max_size):
     :param int min_size: minimum size
     :param int max_size: maximum size
 
-    page_name = printable w/o "#:<>[]_{|}", { printable w/o "#<>[]_{|}" };
+    page_name = unicode w/o "\n\r#:<>[]_{|}",
+    { unicode w/o "\n\r#<>[]_{|}" };
 
     :returns: page_name
     :rtype: str
     """
-    initChars = "".join(
-        char for char in string.printable if char not in "#:<>[]_{|}"
-    )
-    initChar = draw(hypothesis.strategies.sampled_from(initChars))
-    bodyChars = "".join(
-        char for char in string.printable if char not in "#<>[]_{|}"
-    )
-    body = draw(
-        hypothesis.strategies.text(
-            alphabet=bodyChars, min_size=min_size, max_size=max_size
+    init_char = draw(
+        hypothesis.strategies.characters(
+            blacklist_characters="\n\r#:<>[]_{|}"
         )
     )
-    page_name_ = initChar + body
+    alphabet = draw(
+        hypothesis.strategies.characters(
+            blacklist_characters="\n\r#<>[]_{|}"
+        )
+    )
+    if min_size > 1:
+        page_name_ = init_char + draw(
+            hypothesis.strategies.text(
+                alphabet=alphabet, min_size=min_size, max_size=max_size-1
+            )
+        )
+    else:
+        page_name_ = init_char
     return page_name_
 
 
@@ -97,19 +104,17 @@ def link_text(draw, min_size, max_size):
     :param int min_size: minimum size
     :param int max_size: maximum size
 
-    link_text = { printable w/o "#<>[]_{|}" }-;
+    link_text = { unicode w/o "\n\r#<>[]_{|}" }-;
 
     :returns: link_text
     :rtype: str
     """
-    bodyChars = "".join(
-        char for char in string.printable if char not in "#<>[]_{|}"
+    alphabet = hypothesis.strategies.characters(
+        blacklist_characters="\n\r#<>[]_{|}"
     )
     link_text_ = draw(
         hypothesis.strategies.text(
-            alphabet=bodyChars,
-            min_size=min_size,
-            max_size=max_size
+            alphabet=alphabet, min_size=min_size, max_size=max_size
         )
     )
     return link_text_
@@ -137,13 +142,13 @@ def word_ending(draw, min_size, max_size):
     return word_ending_
 
 
-def internal_link(page_name, namespace_prefix="", piped="", word_ending=""):
+def internal_link(page_name_, namespace_prefix="", piped="", word_ending_=""):
     """Return internal_link.
 
-    :param str page_name: page_name (contains anchor if so)
+    :param str page_name_: page_name (contains anchor if so)
     :param str namespace_prefix: namespace prefix
     :param str piped: piped
-    :param str word_ending: word_ending
+    :param str word_ending_: word_ending
 
     namespace_prefix = [ namespace ], ":";
     piped = "|", [ link_text ];
@@ -155,23 +160,23 @@ def internal_link(page_name, namespace_prefix="", piped="", word_ending=""):
     :returns: internal_link
     :rtype: str
     """
-    internal_link = (
+    internal_link_ = (
         "[[{namespace_prefix}{page_name}{piped}]]{word_ending}"
     )
-    internal_link = internal_link.format(
+    internal_link_ = internal_link_.format(
         namespace_prefix=namespace_prefix,
-        page_name=page_name,
+        page_name=page_name_,
         piped=piped,
-        word_ending=word_ending
+        word_ending=word_ending_
     )
-    return internal_link
+    return internal_link_
 
 
 @hypothesis.strategies.composite
-def redirect(draw, internal_link):
+def redirect(draw, internal_link_):
     """Return redirect.
 
-    :param str internal_link: internal_link
+    :param str internal_link_: internal_link
 
     redirect = "#REDIRECT", space | tab, internal_link;
 
@@ -179,5 +184,5 @@ def redirect(draw, internal_link):
     :rtype: str
     """
     space_tab = draw(hypothesis.strategies.sampled_from(" \t"))
-    redirect = "#REDIRECT" + space_tab + internal_link
-    return redirect
+    redirect_ = "#REDIRECT" + space_tab + internal_link_
+    return redirect_
