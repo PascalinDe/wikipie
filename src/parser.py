@@ -119,12 +119,10 @@ class Parser():
         :rtype: list
         """
         try:
-            #: paragraph = 2*newline | <br> | <br />;
-            #: newline = U+000AU+000D | U+000DU+000A | U+000A | U+000D;
-            pattern = r"(?:(?:\n\r)|(?:\r\n)|\n|\r){2}|(?:<br>)|(?:<br />)"
+            pattern = src.parser_elements.layout.get_line_break_regex()
             paragraphs = [
                 src.page_elements.Paragraph(index, wikitext)
-                for index, wikitext in enumerate(re.split(pattern, wikitext))
+                for index, wikitext in enumerate(pattern.split(wikitext))
             ]
         except Exception as exception:
             msg = "failed to find paragraphs\t: {}"

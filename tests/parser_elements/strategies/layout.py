@@ -68,3 +68,19 @@ def section(draw, heading_text_, level):
     )
     section_ = draw(hypothesis.strategies.sampled_from(elements))
     return section_
+
+
+@hypothesis.strategies.composite
+def line_break(draw):
+    """Return line_break.
+
+    :returns: line_break
+    :rtype: str
+    """
+    elements = (
+        draw(hypothesis.strategies.from_regex(r"(?:\n|\r){2}")),
+        "<br>",
+        "<br \>"
+    )
+    line_break_ = draw(hypothesis.strategies.sampled_from(elements))
+    return line_break_

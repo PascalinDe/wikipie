@@ -86,3 +86,15 @@ class TestLayout(unittest.TestCase):
         self.assertEqual(section, match.group(0))
         self.assertRaises(IndexError, match.group, 1)
         return
+
+    @hypothesis.given(
+        strategies.layout.line_break()
+    )
+    def test_line_break_00(self, line_break):
+        """Test line_break regex.
+
+        :param str line_break: line_break
+        """
+        line_break_regex = layout.get_line_break_regex()
+        self.assertRegex(line_break, line_break_regex)
+        return
