@@ -43,11 +43,13 @@ class TestLinks(unittest.TestCase):
         :returns: namespaces
         :rtype: list
         """
+        # pylint: disable=invalid-name
         with open("tests/parser_elements/data/namespaces.csv") as fp:
             reader = csv.reader(fp)
             namespaces = next(reader)
         return namespaces
 
+    # pylint: disable=no-value-for-parameter
     @hypothesis.given(strategies.links.namespace())
     def test_namespace_00(self, namespace):
         """Test namespace parser element.
@@ -55,6 +57,7 @@ class TestLinks(unittest.TestCase):
         :param str namespace: namespace
         """
         namespaces = self._get_namespaces()
+        # pylint: disable=protected-access
         parser_element = links._get_namespace(namespaces)
         parse_results = parser_element.parseString(namespace)
         self.assertEqual(namespace, parse_results["namespace"])
@@ -66,6 +69,7 @@ class TestLinks(unittest.TestCase):
 
         :param str page_name: page_name
         """
+        # pylint: disable=protected-access
         parser_element = links._get_page_name()
         parse_results = parser_element.parseString(page_name)
         self.assertEqual(page_name, parse_results["page_name"])
@@ -80,6 +84,7 @@ class TestLinks(unittest.TestCase):
         anchor = "#", heading_text;
         """
         anchor = strategies.links.anchor(heading_text=heading_text)
+        # pylint: disable=protected-access
         parser_element = links._get_anchor()
         parse_results = parser_element.parseString(anchor)
         self.assertEqual(heading_text, parse_results["anchor"]["heading_text"])
@@ -91,6 +96,7 @@ class TestLinks(unittest.TestCase):
         anchor = "#", "top";
         """
         anchor = strategies.links.anchor()
+        # pylint: disable=protected-access
         parser_element = links._get_anchor()
         parse_results = parser_element.parseString(anchor)
         self.assertEqual("top", parse_results["anchor"]["heading_text"])
@@ -102,6 +108,7 @@ class TestLinks(unittest.TestCase):
 
         :param str link_text: link_text
         """
+        # pylint: disable=protected-access
         parser_element = links._get_link_text()
         parse_results = parser_element.parseString(link_text)
         self.assertEqual(link_text, parse_results["link_text"])
@@ -113,6 +120,7 @@ class TestLinks(unittest.TestCase):
 
         :param str word_ending: word_ending
         """
+        # pylint: disable=protected-access
         parser_element = links._get_word_ending()
         parse_results = parser_element.parseString(word_ending)
         self.assertEqual(word_ending, parse_results["word_ending"])
@@ -269,7 +277,7 @@ class TestLinks(unittest.TestCase):
             page_name,
             namespace_prefix=namespace_prefix,
             piped=piped,
-            word_ending=word_ending
+            word_ending_=word_ending
         )
         namespaces = self._get_namespaces()
         parser_element = links.get_internal_link(namespaces)
@@ -307,7 +315,7 @@ class TestLinks(unittest.TestCase):
         internal_link = strategies.links.internal_link(
             anchor,
             piped=piped,
-            word_ending=word_ending
+            word_ending_=word_ending
         )
         namespaces = self._get_namespaces()
         parser_element = links.get_internal_link(namespaces)

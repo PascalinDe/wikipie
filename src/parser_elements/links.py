@@ -66,20 +66,15 @@ def _get_page_name(flag=False):
 
     :param bool flag: toggle debug messages on/off
 
-    page_name = printable w/o "#:<>[]_{|}", { printable w/o "#<>[]_{|}" };
+    page_name = unicode w/o "\n\r#:<>[]_{|}",
+    { unicode w/o "\n\r#<>[]_{|}" };
 
     :returns: page_name
     :rtype: ParserElement
     """
     try:
-        init_chars = "".join(
-            char for char in string.printable if char not in "#:<>[]_{|}"
-        )
-        body_chars = "".join(
-            char for char in string.printable if char not in "#<>[]_{|}"
-        )
-        page_name = pyparsing.Word(
-            init_chars, bodyChars=body_chars
+        page_name = pyparsing.Regex(
+            r"[^{0}][^{1}]*".format(r"\n\r#:<>\[\]_{|}", r"\n\r#<>\[\]_{|}")
         )
         page_name.leaveWhitespace()
         page_name.parseWithTabs()
@@ -127,16 +122,13 @@ def _get_link_text(flag=False):
 
     :param bool flag: toggle debug messages on/off
 
-    link_text = { printable w/o "#<>[]_{|}" }-;
+    link_text = { unicode w/o "\n\r#<>[]_{|}" }-;
 
     :returns: link_text parser element
     :rtype: ParserElement
     """
     try:
-        init_chars = "".join(
-            char for char in string.printable if char not in "#<>[]_{|}"
-        )
-        link_text = pyparsing.Word(init_chars)
+        link_text = pyparsing.Regex(r"[^{0}]+".format(r"\n\r#<>\[\]_{|}"))
         link_text.leaveWhitespace()
         link_text.parseWithTabs()
         if flag:
