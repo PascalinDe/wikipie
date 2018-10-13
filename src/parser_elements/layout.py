@@ -89,3 +89,23 @@ def get_section_regex(level=2, non_capturing=False, flag=False):
         msg = "failed to get section regular expression:{}".format(exception)
         raise RuntimeError(msg)
     return pattern
+
+
+def get_line_break_regex(flag=False):
+    """Get line_break regular expression.
+
+    :param bool flag: toggle debug messages on/off
+
+    :returns: paragraph regular expression
+    :rtype: SRE_Pattern
+    """
+    try:
+        pattern = r"(?:\n|\r){2}|<br>|<br \\\>"
+        if flag:
+            pattern = re.compile(pattern, flags=re.DEBUG)
+        else:
+            pattern = re.compile(pattern)
+    except Exception as exception:
+        msg = "failed to get paragraph regular expression:{}".format(exception)
+        raise RuntimeError(msg)
+    return pattern
