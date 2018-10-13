@@ -28,6 +28,7 @@ import re
 # library specific imports
 import src.page_elements
 import src.parser_elements.links
+import src.parser_elements.layout
 
 
 class Parser():
@@ -61,13 +62,9 @@ class Parser():
         :rtype: Section
         """
         try:
-            #: section_heading = ^, (2*6"=", unicode_char w/o "=",
-            #: { unicode_char }-, 2*6"=" ) | ("<h[2-6]>", { unicode_char }-,
-            #: "</h[2-6]>", $;
-            format_string = (
-                r"^(?:={{{0}}}([^=].*?)={{{0}}})|(?:<h{0}>(.+?)</h{0}>)$"
+            pattern = src.parser_elements.layout.get_section_regex(
+                level=level
             )
-            pattern = re.compile(format_string.format(level), re.MULTILINE)
             matches = [
                 match[0] if match[0] else match[1]
                 for match in pattern.findall(wikitext)
@@ -75,12 +72,8 @@ class Parser():
             if not matches:     # pylint: disable=no-else-return
                 return src.page_elements.Section(level-1, "", wikitext, [])
             else:
-                format_string = (
-                    r"^(?:={{{0}}}(?:[^=].*?)={{{0}}})|"
-                    r"(?:<h{0}>(?:.+?)</h{0}>)$"
-                )
-                pattern = re.compile(
-                    format_string.format(level), re.MULTILINE
+                pattern = src.parser_elements.layout.get_section_regex(
+                    level=level, non_capturing=True
                 )
                 splits = [
                     split for split in pattern.split(wikitext) if split
