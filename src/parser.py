@@ -21,7 +21,6 @@
 
 
 # standard library imports
-import re
 
 # third party imports
 
