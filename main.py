@@ -33,7 +33,7 @@ import src.page
 import src.parser
 
 
-def main():
+def main():     # pylint: disable=too-many-locals
     """main function."""
     try:
         logging.basicConfig(level=logging.DEBUG)
