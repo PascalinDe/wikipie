@@ -372,8 +372,7 @@ class TestLinks(unittest.TestCase):
         return
 
     @hypothesis.given(
-        hypothesis.strategies.data(),
-        strategies.links.page_name(1, 16)
+        hypothesis.strategies.data(), strategies.links.page_name(1, 16)
     )
     def test_redirect_00(self, data, page_name):
         """Test redirect parser element.
@@ -386,4 +385,59 @@ class TestLinks(unittest.TestCase):
         parser_element = links.get_redirect(namespaces)
         parse_results = parser_element.parseString(redirect)
         self.assertEqual(internal_link, parse_results["internal_link"][0])
+        return
+
+    @hypothesis.given(
+        strategies.links.url(1, 16)
+    )
+    def test_url_00(self, url):
+        """Test URL parser element.
+
+        :param str url: URL
+        """
+        # pylint: disable=protected-access
+        parser_element = links._get_url()
+        parse_results = parser_element.parseString(url)
+        self.assertEqual(url, parse_results["url"])
+        return
+
+    @hypothesis.given(
+        hypothesis.strategies.data(),
+        strategies.links.url(1, 16)
+    )
+    def test_external_link_00(self, data, url):
+        """Test external_link parser element.
+
+        :param str url: URL
+
+        external_link = "[", url, "]";
+        """
+        external_link = data.draw(strategies.links.external_link(url))
+        parser_element = links.get_external_link()
+        parse_results = parser_element.parseString(external_link)
+        self.assertEqual(url, parse_results["external_link"]["url"])
+        return
+
+    @hypothesis.given(
+        hypothesis.strategies.data(),
+        strategies.links.url(1, 16),
+        strategies.links.link_text(1, 16)
+    )
+    def test_external_link_01(self, data, url, link_text):
+        """Test external_link parser element.
+
+        :param str url: URL
+        :param str link_text: link_text
+
+        external_link = "[", url, space | tab, link_text, "]";
+        """
+        external_link = data.draw(
+            strategies.links.external_link(url, link_text_=link_text)
+        )
+        parser_element = links.get_external_link()
+        parse_results = parser_element.parseString(external_link)
+        self.assertEqual(url, parse_results["external_link"]["url"])
+        self.assertEqual(
+            link_text, parse_results["external_link"]["link_text"]
+        )
         return
