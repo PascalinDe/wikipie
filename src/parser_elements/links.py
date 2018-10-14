@@ -213,6 +213,64 @@ def get_internal_link(namespaces, flag=False):
     return internal_link
 
 
+def _get_url(flag=False):
+    """Get URL parser element.
+
+    url = { unicode w/o "\t\n\r []" }-;
+
+    :param bool flag: toggle debug messages on/off
+
+    :returns: URL parser element
+    :rtype: ParserElement
+    """
+    try:
+        url = pyparsing.Regex(r"[^{0}]+".format(r"\t\n\r \[\]"))
+        url.leaveWhitespace()
+        url.parseWithTabs()
+        if flag:
+            url.setDebug()
+        url.setName("url")
+        url = url.setResultsName("url")
+    except Exception as exception:
+        msg = "failed to get URL parser element:{}".format(exception)
+        raise RuntimeError(msg)
+    return url
+
+
+def get_external_link(flag=False):
+    """Get external_link parser element.
+
+    external_link = "[", url, [ space | tab, link_text ], "]";
+
+    :param bool flag: toggle debug messages on/off
+
+    :returns: external_link parser element
+    :rtype: ParserElement
+    """
+    try:
+        external_link_opening = pyparsing.Literal("[")
+        url = _get_url(flag=flag)
+        space_tab = pyparsing.Regex(r" |\t")
+        link_text = _get_link_text(flag=flag)
+        external_link_closing = pyparsing.Literal("]")
+        external_link = pyparsing.Combine(
+            external_link_opening
+            + url
+            + pyparsing.Optional(pyparsing.Combine(space_tab + link_text))
+            + external_link_closing
+        )
+        external_link.leaveWhitespace()
+        external_link.parseWithTabs()
+        if flag:
+            external_link.setDebug()
+        external_link.setName("external_link")
+        external_link = external_link.setResultsName("external_link")
+    except Exception as exception:
+        msg = "failed to get external_link parser element:{}".format(exception)
+        raise RuntimeError(msg)
+    return external_link
+
+
 def get_redirect(namespaces, flag=False):
     """"Get redirect parser element.
 

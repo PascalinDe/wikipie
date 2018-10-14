@@ -186,3 +186,49 @@ def redirect(draw, internal_link_):
     space_tab = draw(hypothesis.strategies.sampled_from(" \t"))
     redirect_ = "#REDIRECT" + space_tab + internal_link_
     return redirect_
+
+
+@hypothesis.strategies.composite
+def url(draw, min_size, max_size):
+    """Return URL.
+
+    :param int min_size: minimum size
+    :param int max_size: maximum size
+
+    url = { unicode w/o "\t\n\r []" }-;
+
+    :returns: URL
+    :rtype: str
+    """
+    alphabet = hypothesis.strategies.characters(
+        blacklist_characters="\t\n\r []"
+    )
+    url_ = draw(
+        hypothesis.strategies.text(
+            alphabet=alphabet, min_size=min_size, max_size=max_size
+        )
+    )
+    return url_
+
+
+@hypothesis.strategies.composite
+def external_link(draw, url_, link_text_=""):
+    """Return external_link.
+
+    :param str url_: URL
+    :param str link_text_: link_text
+
+    external_link = "[", url, [ space | tab, link_text ];
+
+    :returns: external_link
+    :rtype: str
+    """
+    if link_text_:
+        space_tab = draw(hypothesis.strategies.sampled_from(" \t"))
+    else:
+        space_tab = ""
+    external_link_ = "[{url}{space_tab}{link_text}]"
+    external_link_ = external_link_.format(
+        url=url_, space_tab=space_tab, link_text=link_text_
+    )
+    return external_link_
