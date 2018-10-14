@@ -50,7 +50,7 @@ class Paragraph(_Paragraph):    # pylint: disable=missing-docstring
 
 
 _InternalLink = collections.namedtuple(
-    "InternalLink", ["namespace", "page_name", "anchor"]
+    "InternalLink", ["namespace", "page_name", "link_text"]
 )
 
 
@@ -58,7 +58,7 @@ class InternalLink(_InternalLink):  # pylint: disable=missing-docstring
     __slots__ = ()
 
     def __repr__(self):
-        return self.anchor
+        return self.link_text
 
     def __format__(self, format_spec):
-        return self.anchor
+        return self.link_text
