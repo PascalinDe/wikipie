@@ -31,6 +31,7 @@ from src.parser_elements import layout
 
 
 #: https://www.mediawiki.org/wiki/Help:Interwiki_linking
+#: https://www.mediawiki.org/wiki/Special:MyLanguage/Markup_spec/BNF/Links#External_links
 #: https://en.wikipedia.org/wiki/Wikipedia:Namespace
 #: https://en.wikipedia.org/wiki/Wikipedia:Article_titles
 
