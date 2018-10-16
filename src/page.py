@@ -266,3 +266,18 @@ class Page():
             msg = "failed to create pagelinks table:{}".format(exception)
             raise RuntimeError(msg)
         return pagelinks_table
+
+    def find_external_links(self, wikitext):
+        """Find external links.
+
+        :param str wikitext: wikitext
+
+        :returns: external links
+        :rtype: list
+        """
+        try:
+            external_links = self.parser.find_external_links(wikitext)
+        except Exception as exception:
+            msg = "failed to find external_links:{}".format(exception)
+            raise RuntimeError(msg)
+        return external_links

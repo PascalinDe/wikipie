@@ -80,6 +80,9 @@ def main():     # pylint: disable=too-many-locals
                 print(internal_links)
                 rows = page.create_pagelinks_table()
                 print(rows)
+                section = page.find_section("Official websites")
+                external_links = page.find_external_links(section.wikitext)
+                print(external_links)
         time1 = time.time()
         logger.info("parsed wikitext (%f sec)", time1 - time0)
     except Exception as exception:

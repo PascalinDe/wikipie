@@ -176,3 +176,32 @@ class Parser():
             msg = "failed to find internal links\t: {}"
             raise RuntimeError(msg.format(exception))
         return internal_links
+
+    @staticmethod
+    def find_external_links(wikitext):
+        """Find external links.
+
+        :param str wikitext: wikitext
+
+        :returns: external links
+        :rtype: list
+        """
+        try:
+            parser_element = src.parser_elements.links.get_external_link()
+            tokens = [
+                tokens for tokens, _, _ in parser_element.scanString(wikitext)
+            ]
+            external_links = []
+            for token in tokens:
+                url = token["external_link"]["url"]
+                if "link_text" in token:
+                    link_text = token["external_link"]["link_text"]
+                else:
+                    link_text = token["external_link"]["url"]
+                external_links.append(
+                    src.page_elements.ExternalLink(url, link_text)
+                )
+        except Exception as exception:
+            msg = "failed to find external links\t:{}"
+            raise RuntimeError(msg.format(exception))
+        return external_links
