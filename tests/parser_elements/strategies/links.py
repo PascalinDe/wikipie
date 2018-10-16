@@ -195,19 +195,30 @@ def url(draw, min_size, max_size):
     :param int min_size: minimum size
     :param int max_size: maximum size
 
-    url = { unicode w/o "\t\n\r []" }-;
+    url = { any of "+-.0-9A-Za-z" }-, "://", { printable w/o "\t\n\r []" }-;
 
     :returns: URL
     :rtype: str
     """
-    alphabet = hypothesis.strategies.characters(
-        blacklist_characters="\t\n\r []"
-    )
-    url_ = draw(
-        hypothesis.strategies.text(
-            alphabet=alphabet, min_size=min_size, max_size=max_size
+    protocol = draw(
+        # pylint: disable=unexpected-keyword-arg
+        hypothesis.strategies.from_regex(
+            r"[+\-.0-9A-Za-z]+://", fullmatch=True
         )
     )
+    hypothesis.assume(len(protocol) < max_size)
+    hypothesis.note(protocol)
+    alphabet = "".join(
+        char for char in string.printable if char not in "\t\n\r []"
+    )
+    path = draw(
+        hypothesis.strategies.text(
+            alphabet=alphabet,
+            min_size=min_size,
+            max_size=max_size-len(protocol)
+        )
+    )
+    url_ = protocol + path
     return url_
 
 

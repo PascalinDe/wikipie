@@ -216,7 +216,7 @@ def get_internal_link(namespaces, flag=False):
 def _get_url(flag=False):
     """Get URL parser element.
 
-    url = { unicode w/o "\t\n\r []" }-;
+    url = { any of "+-.0-9A-Za-z" }-, "://", { printable w/o "\t\n\r []" }-;
 
     :param bool flag: toggle debug messages on/off
 
@@ -224,7 +224,9 @@ def _get_url(flag=False):
     :rtype: ParserElement
     """
     try:
-        url = pyparsing.Regex(r"[^{0}]+".format(r"\t\n\r \[\]"))
+        url = pyparsing.Regex(
+            r"[+\-.0-9A-Za-z]+://[^{0}]+".format(r"\t\n\r \[\]")
+        )
         url.leaveWhitespace()
         url.parseWithTabs()
         if flag:
