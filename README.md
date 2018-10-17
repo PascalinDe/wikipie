@@ -9,7 +9,7 @@ The input are an XML document output by [Special:Export](https://en.wikipedia.or
 In case no output file has been specified, the output is printed to stdout.
 
 ### Example
-Running `python3 main.py examples/export-0.10.xsd examples/Wikipedia-20180812145957.xml` shows the current features. In the order
+Running `python3 main.py examples/Wikipedia-20180812145957.xml examples/export-0.10.xsd` shows the current features. In the order
 of the output
 
 * table of contents (in JSON)
