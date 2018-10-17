@@ -36,8 +36,10 @@ def get_argument_parser():
     """
     try:
         argument_parser = argparse.ArgumentParser()
-        argument_parser.add_argument("input", help="input file")
-        argument_parser.add_argument("xsd", help="XSD")
+        argument_parser.add_argument(
+            "input", help="XML document (output of Special:Export)"
+        )
+        argument_parser.add_argument("xsd", help="XML Schema Definition")
         argument_parser.add_argument("-o", "--output", help="output file")
         argument_parser.add_argument(
             "-p", "--processes",
