@@ -78,7 +78,7 @@ def line_break(draw):
     :rtype: str
     """
     elements = (
-        draw(hypothesis.strategies.from_regex(r"(?:\n|\r){2}")),
+        draw(hypothesis.strategies.from_regex(r"(?:\n|(?:\r\n)){2}")),
         "<br>",
         "<br \>"
     )

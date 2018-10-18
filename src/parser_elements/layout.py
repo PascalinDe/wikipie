@@ -100,7 +100,7 @@ def get_line_break_regex(flag=False):
     :rtype: SRE_Pattern
     """
     try:
-        pattern = r"(?:\n|\r){2}|<br>|<br \\\>"
+        pattern = r"(?:\n|(?:\r\n)){2}|<br>|<br \\\>"
         if flag:
             pattern = re.compile(pattern, flags=re.DEBUG)
         else:
