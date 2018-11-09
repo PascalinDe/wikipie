@@ -3,6 +3,13 @@
 
 Wikitext parser.
 
+## About
+The software at hand is a rewrite of [Wikipie](https://github.com/PascalinDe/wikipie_deprecated/blob/master/wikipie/main.py),
+the wikitext parser I developed at the [Database Systems Research Group](https://dbs.ifi.uni-heidelberg.de/). Its functionality
+is at the moment limited, so feel free to use the aforementioned repository. Over time, the missing functionality will be added.
+Also, different features are provided. For example, this wikitext parser allows to process only given sections instead of the
+entire page.
+
 ## Usage
 The input are an XML document output by [Special:Export](https://en.wikipedia.org/wiki/Special:Export) and its corresponding
 [XML Schema Definition](https://www.mediawiki.org/xml/export-0.10.xsd). The output file can be specified using the `-o` option.
